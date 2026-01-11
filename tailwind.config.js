@@ -4,12 +4,17 @@ export default {
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
+  darkMode: 'class', // Important: Manually toggle via 'dark' class
   theme: {
     extend: {
       colors: {
-        background: '#0f172a', // Slate 900
-        surface: '#1e293b',    // Slate 800
-        primary: '#38bdf8',    // Sky 400
+        background: 'var(--color-bg)',
+        surface: 'var(--color-surface)',
+        'surface-hover': 'var(--color-surface-hover)',
+        primary: 'var(--color-primary)',
+        'text-main': 'var(--color-text-main)',
+        'text-muted': 'var(--color-text-muted)',
+        border: 'var(--color-border)',
       },
       fontFamily: {
         sans: ['Inter', 'sans-serif'],
@@ -18,4 +23,3 @@ export default {
   },
   plugins: [],
 }
-

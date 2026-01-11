@@ -1,13 +1,15 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { AppProvider, useAppStore } from './store/AppContext';
 import { AppLayout } from './components/layout/AppLayout';
 import { CalendarWidget } from './components/widgets/CalendarWidget';
 import { ClockWidget } from './components/widgets/ClockWidget';
 import { MediaPanel } from './components/widgets/MediaPanel';
-import { Calendar as CalIcon, Columns } from 'lucide-react';
+import { SettingsModal } from './components/settings/SettingsModal';
+import { Calendar as CalIcon, Columns, Settings } from 'lucide-react';
 
 const DashboardContent: React.FC = () => {
   const { viewMode, toggleView, toggleSplit, isSplit } = useAppStore();
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   const CalendarSection = (
     <>
@@ -15,6 +17,15 @@ const DashboardContent: React.FC = () => {
         <ClockWidget />
 
         <div className="flex gap-3">
+          {/* Settings Trigger */}
+          <button
+            onClick={() => setIsSettingsOpen(true)}
+            className="flex items-center justify-center p-3 rounded-xl border border-slate-700 text-slate-400 hover:bg-slate-700 hover:text-white transition-all mr-2"
+            title="Settings"
+          >
+            <Settings size={20} />
+          </button>
+
           <button
             onClick={toggleView}
             className="flex items-center gap-2 px-4 py-3 rounded-xl bg-slate-800 border border-slate-700 text-slate-200 font-semibold hover:bg-slate-700 hover:border-sky-500 transition-all"
@@ -38,6 +49,11 @@ const DashboardContent: React.FC = () => {
       </header>
 
       <CalendarWidget />
+
+      <SettingsModal
+        isOpen={isSettingsOpen}
+        onClose={() => setIsSettingsOpen(false)}
+      />
     </>
   );
 
