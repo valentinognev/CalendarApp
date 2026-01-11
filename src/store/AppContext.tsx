@@ -19,6 +19,7 @@ export interface Settings {
     dayNameSize: Size; // sm, md, lg
     dayNameAlign: Alignment;
     timeFormat: '12' | '24';
+    showJewishCalendar: boolean;
 }
 
 const DEFAULT_SETTINGS: Settings = {
@@ -31,6 +32,7 @@ const DEFAULT_SETTINGS: Settings = {
     dayNameSize: 'sm',
     dayNameAlign: 'center',
     timeFormat: '24',
+    showJewishCalendar: false,
 };
 
 interface AppState {
@@ -85,7 +87,14 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     const toggleSplit = () => setIsSplit(prev => !prev);
 
     const updateSettings = (partial: Partial<Settings>) => {
-        setSettings(prev => ({ ...prev, ...partial }));
+        setSettings(prev => {
+            const newSettings = { ...prev, ...partial };
+            // Auto-enable Jewish calendar if switching to Hebrew, unless explicitly set
+            if (partial.language === 'he' && partial.showJewishCalendar === undefined) {
+                newSettings.showJewishCalendar = true;
+            }
+            return newSettings;
+        });
     };
 
     // [NEW] Navigation Logic

@@ -2,6 +2,7 @@ import React from 'react';
 import { useAppStore } from '../../store/AppContext';
 import { startOfMonth, endOfMonth, startOfWeek, endOfWeek, eachDayOfInterval, format, isSameMonth, isToday, isWeekend } from 'date-fns';
 import { enUS, ru, he } from 'date-fns/locale';
+import { HDate } from '@hebcal/core';
 
 const LOCALE_MAP: Record<string, any> = {
     en: enUS,
@@ -88,6 +89,17 @@ export const CalendarWidget: React.FC = () => {
                             (settings.highlightWeekend === 'sat' && day.getDay() === 6) ||
                             (settings.highlightWeekend === 'sun' && day.getDay() === 0);
 
+                        // Jewish Date Calculation
+                        let jewishDayStr = '';
+                        let isRoshChodesh = false;
+                        if (settings.showJewishCalendar) {
+                            const hdate = new HDate(day);
+                            jewishDayStr = settings.language === 'he'
+                                ? hdate.renderGematriya().split(' ')[0].replace(/'/g, '') // Just the day letter(s)
+                                : hdate.getDate().toString();
+                            isRoshChodesh = hdate.getDate() === 1;
+                        }
+
                         return (
                             <div
                                 key={day.toString()}
@@ -105,6 +117,20 @@ export const CalendarWidget: React.FC = () => {
                                 <span className={`font-bold mb-auto ${SIZE_MAP[settings.dayNumberSize]} ${isDayToday ? 'text-primary' : shouldHighlightWeekend ? 'text-red-600 dark:text-red-400' : 'text-text-main'}`}>
                                     {format(day, 'd')}
                                 </span>
+
+                                {/* Jewish Day Number (opposite corner) */}
+                                {settings.showJewishCalendar && (
+                                    <span className={`absolute ${settings.language === 'he'
+                                        ? (settings.dayNumberAlign === 'left' ? 'top-4 left-4' : 'top-4 right-4') // RTL: Start is Right, so put Jewish on Left
+                                        : (settings.dayNumberAlign === 'left' ? 'top-4 right-4' : 'top-4 left-4') // LTR: Start is Left, so put Jewish on Right
+                                        } 
+                                        ${isRoshChodesh
+                                            ? 'w-10 h-10 flex items-center justify-center bg-cyan-600 text-white rounded-full shadow-md text-xl font-bold z-10'
+                                            : 'text-3xl font-bold text-text-muted opacity-60 font-serif'
+                                        }`}>
+                                        {jewishDayStr}
+                                    </span>
+                                )}
 
                                 {/* Optional event dot placeholder */}
                                 {isDayToday && <div className="w-2 h-2 rounded-full bg-primary mt-2"></div>}
@@ -132,11 +158,20 @@ export const CalendarWidget: React.FC = () => {
                         (settings.highlightWeekend === 'sat' && day.getDay() === 6) ||
                         (settings.highlightWeekend === 'sun' && day.getDay() === 0);
 
+                    // Jewish Date Calculation
+                    let jewishDayStr = '';
+                    if (settings.showJewishCalendar) {
+                        const hdate = new HDate(day);
+                        jewishDayStr = settings.language === 'he'
+                            ? hdate.renderGematriya().split(' ')[0].replace(/'/g, '')
+                            : hdate.getDate().toString();
+                    }
+
                     return (
                         <div
                             key={day.toString()}
                             className={`
-                                rounded-2xl flex flex-col items-center justify-center p-6 border transition-all
+                                rounded-2xl flex flex-col items-center justify-center p-6 border transition-all relative
                                 ${isDayToday
                                     ? 'bg-surface border-primary scale-105 shadow-xl z-10'
                                     : shouldHighlightWeekend
@@ -144,12 +179,23 @@ export const CalendarWidget: React.FC = () => {
                                         : 'bg-surface/50 border-transparent'}
                               `}
                         >
-                            <span className={`text-text-muted font-bold uppercase tracking-widest mb-2 ${NAME_SIZE_MAP[settings.dayNameSize] || 'text-xs'}`}>
+                            <span className={`text-text-muted font-bold uppercase tracking-widest mb-2 ${NAME_SIZE_MAP[settings.dayNameSize] || 'text-xs'} `}>
                                 {format(day, 'EEEE', { locale: currentLocale })}
                             </span>
                             <span className={`font-light ${SIZE_MAP[settings.dayNumberSize] === 'text-4xl' ? 'text-6xl' : 'text-4xl'} ${isDayToday ? 'text-primary' : shouldHighlightWeekend ? 'text-red-600 dark:text-red-400' : 'text-text-main'}`}>
                                 {format(day, 'd')}
                             </span>
+
+                            {/* Jewish Day Number (opposite corner) */}
+                            {settings.showJewishCalendar && (
+                                <span className={`absolute ${settings.language === 'he'
+                                    ? 'top-4 left-4' // In Week View, items are centered typically, so put Jewish on Left (RTL Start = Right)
+                                    : 'top-4 right-4'
+                                    } text-3xl font-bold text-text-muted opacity-60 font-serif`}>
+                                    {jewishDayStr}
+                                </span>
+                            )}
+
                             <div className="mt-8 text-xs text-text-muted italic">No events</div>
                         </div>
                     );

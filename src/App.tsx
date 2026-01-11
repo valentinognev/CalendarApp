@@ -5,9 +5,10 @@ import { CalendarWidget } from './components/widgets/CalendarWidget';
 import { ClockWidget } from './components/widgets/ClockWidget';
 import { MediaPanel } from './components/widgets/MediaPanel';
 import { SettingsModal } from './components/settings/SettingsModal';
-import { Calendar as CalIcon, Columns, Settings, ChevronLeft, ChevronRight, Image as ImageIcon } from 'lucide-react';
-import { format } from 'date-fns';
+import { Calendar as CalIcon, Settings, ChevronLeft, ChevronRight, Image as ImageIcon, RotateCcw } from 'lucide-react';
+import { format, startOfMonth, endOfMonth, startOfWeek, endOfWeek, isSameMonth } from 'date-fns';
 import { enUS, ru, he } from 'date-fns/locale';
+import { HDate } from '@hebcal/core';
 
 const LOCALE_MAP: Record<string, any> = {
   en: enUS,
@@ -30,6 +31,52 @@ const DashboardContent: React.FC = () => {
 
   const headerTitle = format(currentDate, viewMode === 'month' ? 'LLLL yyyy' : "'Week of' MMM d, yyyy", { locale: currentLocale });
 
+  // Jewish Date Subtitle
+  // Jewish Date Subtitle Logic
+  let jewishDateSubtitle = '';
+  if (settings.showJewishCalendar) {
+    // Determine range based on view
+    const weekStartParams = { weekStartsOn: settings.weekStart as 0 | 1, locale: currentLocale };
+    const startDate = viewMode === 'month' ? startOfMonth(currentDate) : startOfWeek(currentDate, weekStartParams);
+    const endDate = viewMode === 'month' ? endOfMonth(currentDate) : endOfWeek(currentDate, weekStartParams);
+
+    const hStart = new HDate(startDate);
+    const hEnd = new HDate(endDate);
+
+    // Helper to get formatted month/year
+    const getHString = (h: HDate) => {
+      if (settings.language === 'he') {
+        // Custom extraction from gematriya string: "Day Month Year" -> "Month Year"
+        const parts = h.renderGematriya(true).split(' ');
+        return {
+          month: parts.slice(1, -1).join(' '), // Middle part(s) are month
+          year: parts[parts.length - 1],       // Last part is year
+          full: parts.slice(1).join(' ')       // Month + Year
+        };
+      } else {
+        return {
+          month: h.getMonthName(),
+          year: h.getFullYear().toString(),
+          full: `${h.getMonthName()} ${h.getFullYear()}`
+        };
+      }
+    };
+
+    const startObj = getHString(hStart);
+    const endObj = getHString(hEnd);
+
+    if (startObj.full === endObj.full) {
+      // Same Month and Year
+      jewishDateSubtitle = startObj.full;
+    } else if (startObj.year === endObj.year) {
+      // Same Year, Different Month
+      jewishDateSubtitle = `${startObj.month} - ${endObj.full}`; // "Shevat - Adar 5786"
+    } else {
+      // Different Year (e.g. Elul to Tishrei)
+      jewishDateSubtitle = `${startObj.full} - ${endObj.full}`;
+    }
+  }
+
   const CalendarSection = (
     <>
       {/* Main Header */}
@@ -43,28 +90,50 @@ const DashboardContent: React.FC = () => {
         {/* CENTER: Navigation & Title (Absolute Centered) */}
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
           <div className="pointer-events-auto flex items-center gap-4">
-            <button
-              onClick={() => navigate('prev')}
-              className="p-2 rounded-full hover:bg-surface-hover text-text-muted hover:text-text-main transition-colors"
-            >
-              <ChevronLeft size={28} />
-            </button>
-
-            <div
-              className="cursor-pointer hover:scale-105 transition-transform text-center"
-              onClick={jumpToToday}
-              title="Jump to Today"
-            >
-              <h2 className="text-7xl font-bold text-text-main capitalize tracking-tight min-w-[300px]">
-                {headerTitle}
-              </h2>
-            </div>
+            {/* BUTTONS SWAPPED: Next (Right Arrow) on Left, Prev (Left Arrow) on Right? 
+                User said "swap the sides of < > arrows". 
+                Usually [ < ] [ Title ] [ > ].
+                If user wants swap: [ > ] [ Title ] [ < ] ?? Or maybe standard RTL flip? 
+                Let's assume explicit swap: 
+                [ChevronRight -> Next] [Title] [ChevronLeft -> Prev] 
+            */}
 
             <button
               onClick={() => navigate('next')}
               className="p-2 rounded-full hover:bg-surface-hover text-text-muted hover:text-text-main transition-colors"
             >
               <ChevronRight size={28} />
+            </button>
+
+            <div
+              className="cursor-pointer hover:scale-105 transition-transform text-center flex flex-col items-center group relative"
+              onClick={jumpToToday}
+              title="Jump to Today"
+            >
+              <h2 className="text-6xl font-bold text-text-main capitalize tracking-tight min-w-[300px] leading-none">
+                {headerTitle}
+              </h2>
+              {settings.showJewishCalendar && (
+                <span className="text-3xl font-light text-primary mt-1 opacity-80">
+                  {jewishDateSubtitle}
+                </span>
+              )}
+
+              {/* Reset Button Indicator if not current month */}
+              {!isSameMonth(currentDate, new Date()) && (
+                <div className="absolute -right-12 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="bg-primary/20 p-2 rounded-full text-primary hover:bg-primary/30">
+                    <RotateCcw size={20} />
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <button
+              onClick={() => navigate('prev')}
+              className="p-2 rounded-full hover:bg-surface-hover text-text-muted hover:text-text-main transition-colors"
+            >
+              <ChevronLeft size={28} />
             </button>
           </div>
         </div>
