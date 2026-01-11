@@ -37,16 +37,15 @@ const TEXT_ALIGN_MAP: Record<string, string> = {
 };
 
 export const CalendarWidget: React.FC = () => {
-    const { viewMode, settings } = useAppStore();
-    const today = new Date();
+    const { viewMode, settings, currentDate } = useAppStore();
     const currentLocale = LOCALE_MAP[settings.language];
 
     // Dynamic Start of Week
     const weekStartParams = { weekStartsOn: settings.weekStart as 0 | 1, locale: currentLocale };
 
     const renderMonthView = () => {
-        const monthStart = startOfMonth(today);
-        const monthEnd = endOfMonth(today);
+        const monthStart = startOfMonth(currentDate);
+        const monthEnd = endOfMonth(currentDate);
         const startDate = startOfWeek(monthStart, weekStartParams);
         const endDate = endOfWeek(monthEnd, weekStartParams);
 
@@ -59,17 +58,17 @@ export const CalendarWidget: React.FC = () => {
         });
 
         return (
-            <div className="flex flex-col h-full animate-in fade-in duration-500">
+            <div className="flex flex-col h-full animate-in fade-in duration-500 border-t border-border pt-4">
                 {/* Header Row */}
-                <div className="grid grid-cols-7 mb-4 border-b border-border pb-2">
+                <div className="grid grid-cols-7 mb-4 pb-2">
                     {weekDays.map(day => (
                         <div
                             key={day.toString()}
                             className={`
-                    text-text-muted font-semibold uppercase tracking-wider pr-4
-                    ${NAME_SIZE_MAP[settings.dayNameSize] || 'text-xs'}
-                    ${TEXT_ALIGN_MAP[settings.dayNameAlign]}
-                `}
+                                text-text-muted font-semibold uppercase tracking-wider pr-4
+                                ${NAME_SIZE_MAP[settings.dayNameSize] || 'text-xs'}
+                                ${TEXT_ALIGN_MAP[settings.dayNameAlign]}
+                            `}
                         >
                             {format(day, 'EEE', { locale: currentLocale })}
                         </div>
@@ -93,15 +92,15 @@ export const CalendarWidget: React.FC = () => {
                             <div
                                 key={day.toString()}
                                 className={`
-                  p-4 rounded-2xl relative flex flex-col transition-all hover:-translate-y-1 hover:bg-surface-hover
-                  ${ALIGN_MAP[settings.dayNumberAlign]}
-                  ${isDayToday
+                                  p-4 rounded-2xl relative flex flex-col transition-all hover:-translate-y-1 hover:bg-surface-hover
+                                  ${ALIGN_MAP[settings.dayNumberAlign]}
+                                  ${isDayToday
                                         ? 'bg-gradient-to-br from-surface to-primary/20 border border-primary shadow-[0_0_15px_var(--color-primary-glow)]'
                                         : shouldHighlightWeekend
                                             ? 'bg-surface-hover border border-border' // Distinct Weekend Style
                                             : 'bg-surface border border-transparent'}
-                  ${!isCurrentMonth ? 'opacity-30' : ''}
-                `}
+                                  ${!isCurrentMonth ? 'opacity-30' : ''}
+                                `}
                             >
                                 <span className={`font-bold mb-auto ${SIZE_MAP[settings.dayNumberSize]} ${isDayToday ? 'text-primary' : shouldHighlightWeekend ? 'text-red-600 dark:text-red-400' : 'text-text-main'}`}>
                                     {format(day, 'd')}
@@ -118,12 +117,12 @@ export const CalendarWidget: React.FC = () => {
     };
 
     const renderWeekView = () => {
-        const start = startOfWeek(today, weekStartParams);
-        const end = endOfWeek(today, weekStartParams);
+        const start = startOfWeek(currentDate, weekStartParams);
+        const end = endOfWeek(currentDate, weekStartParams);
         const days = eachDayOfInterval({ start, end });
 
         return (
-            <div className="grid grid-cols-7 gap-4 h-full animate-in fade-in slide-in-from-right-4 duration-500">
+            <div className="grid grid-cols-7 gap-4 h-full animate-in fade-in slide-in-from-right-4 duration-500 border-t border-border pt-4">
                 {days.map(day => {
                     const isDayToday = isToday(day);
                     const isDayWeekend = isWeekend(day);
@@ -137,13 +136,13 @@ export const CalendarWidget: React.FC = () => {
                         <div
                             key={day.toString()}
                             className={`
-                rounded-2xl flex flex-col items-center justify-center p-6 border transition-all
-                ${isDayToday
+                                rounded-2xl flex flex-col items-center justify-center p-6 border transition-all
+                                ${isDayToday
                                     ? 'bg-surface border-primary scale-105 shadow-xl z-10'
                                     : shouldHighlightWeekend
                                         ? 'bg-surface-hover border-border'
                                         : 'bg-surface/50 border-transparent'}
-              `}
+                              `}
                         >
                             <span className={`text-text-muted font-bold uppercase tracking-widest mb-2 ${NAME_SIZE_MAP[settings.dayNameSize] || 'text-xs'}`}>
                                 {format(day, 'EEEE', { locale: currentLocale })}
@@ -160,7 +159,7 @@ export const CalendarWidget: React.FC = () => {
     };
 
     return (
-        <div className="flex-grow flex flex-col h-full overflow-hidden mt-6">
+        <div className="flex-grow flex flex-col h-full overflow-hidden mt-2">
             {viewMode === 'month' ? renderMonthView() : renderWeekView()}
         </div>
     );

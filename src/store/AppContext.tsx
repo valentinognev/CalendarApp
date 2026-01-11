@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
+import { addMonths, subMonths, addWeeks, subWeeks } from 'date-fns';
 
 type ViewMode = 'month' | 'week';
 export type Language = 'en' | 'ru' | 'he';
@@ -17,6 +18,7 @@ export interface Settings {
     dayNumberAlign: Alignment;
     dayNameSize: Size; // sm, md, lg
     dayNameAlign: Alignment;
+    timeFormat: '12' | '24';
 }
 
 const DEFAULT_SETTINGS: Settings = {
@@ -28,15 +30,19 @@ const DEFAULT_SETTINGS: Settings = {
     dayNumberAlign: 'left',
     dayNameSize: 'sm',
     dayNameAlign: 'center',
+    timeFormat: '24',
 };
 
 interface AppState {
     viewMode: ViewMode;
     isSplit: boolean;
     settings: Settings;
+    currentDate: Date; // [NEW] Lifted state
     toggleView: () => void;
     toggleSplit: () => void;
     updateSettings: (newSettings: Partial<Settings>) => void;
+    navigate: (direction: 'prev' | 'next') => void; // [NEW]
+    jumpToToday: () => void; // [NEW]
 }
 
 const AppContext = createContext<AppState | undefined>(undefined);
@@ -44,6 +50,8 @@ const AppContext = createContext<AppState | undefined>(undefined);
 export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const [viewMode, setViewMode] = useState<ViewMode>('month');
     const [isSplit, setIsSplit] = useState(false);
+    const [currentDate, setCurrentDate] = useState(new Date()); // [NEW]
+
     const [settings, setSettings] = useState<Settings>(() => {
         // Basic persistence
         try {
@@ -80,8 +88,22 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         setSettings(prev => ({ ...prev, ...partial }));
     };
 
+    // [NEW] Navigation Logic
+    const navigate = (direction: 'prev' | 'next') => {
+        if (viewMode === 'month') {
+            setCurrentDate(prev => direction === 'next' ? addMonths(prev, 1) : subMonths(prev, 1));
+        } else {
+            setCurrentDate(prev => direction === 'next' ? addWeeks(prev, 1) : subWeeks(prev, 1));
+        }
+    };
+
+    const jumpToToday = () => setCurrentDate(new Date());
+
     return (
-        <AppContext.Provider value={{ viewMode, isSplit, settings, toggleView, toggleSplit, updateSettings }}>
+        <AppContext.Provider value={{
+            viewMode, isSplit, settings, currentDate,
+            toggleView, toggleSplit, updateSettings, navigate, jumpToToday
+        }}>
             {children}
         </AppContext.Provider>
     );
