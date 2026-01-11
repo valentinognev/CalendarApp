@@ -2,7 +2,7 @@ import React from 'react';
 import { useAppStore } from '../../store/AppContext';
 import { startOfMonth, endOfMonth, startOfWeek, endOfWeek, eachDayOfInterval, format, isSameMonth, isToday, isWeekend } from 'date-fns';
 import { enUS, ru, he } from 'date-fns/locale';
-import { HDate } from '@hebcal/core';
+import { HDate, HebrewCalendar, flags } from '@hebcal/core';
 
 const LOCALE_MAP: Record<string, any> = {
     en: enUS,
@@ -92,12 +92,45 @@ export const CalendarWidget: React.FC = () => {
                         // Jewish Date Calculation
                         let jewishDayStr = '';
                         let isRoshChodesh = false;
+                        let isHoliday = false;
+                        let isErev = false;
+                        let isCholHaMoed = false;
+                        let holidayName = '';
+
                         if (settings.showJewishCalendar) {
                             const hdate = new HDate(day);
                             jewishDayStr = settings.language === 'he'
                                 ? hdate.renderGematriya().split(' ')[0].replace(/'/g, '') // Just the day letter(s)
                                 : hdate.getDate().toString();
                             isRoshChodesh = hdate.getDate() === 1;
+
+                            // Holiday Logic
+                            const events = HebrewCalendar.getHolidaysOnDate(hdate) || [];
+                            if (events.length > 0) {
+                                isHoliday = events.some(e => (e.getFlags() & flags.CHAG) !== 0 || e.basename() === "Yom HaAtzma'ut");
+                                isErev = events.some(e => (e.getFlags() & flags.EREV) !== 0);
+                                isCholHaMoed = events.some(e => (e.getFlags() & flags.CHOL_HAMOED) !== 0);
+
+                                // Get first holiday name (prioritize by importance?)
+                                // Simply mapping all might be too long. Let's take the first significant one.
+                                // Filter out candle lighting times and parsha? Hebcal returns mainly holidays here.
+                                const primaryEvent = events.find(e => (e.getFlags() & flags.CHAG) || (e.getFlags() & flags.CHOL_HAMOED) || (e.getFlags() & flags.EREV)) || events[0];
+                                if (primaryEvent) {
+                                    holidayName = primaryEvent.render(settings.language === 'he' ? 'he' : 'en');
+                                }
+                            }
+                        }
+
+                        // Badge Style Determination
+                        let badgeStyle = 'text-3xl font-bold text-text-muted opacity-60 font-serif'; // Default
+                        if (isHoliday) {
+                            badgeStyle = 'w-10 h-10 flex items-center justify-center bg-red-500 text-white rounded-full shadow-md text-xl font-bold z-10';
+                        } else if (isCholHaMoed) {
+                            badgeStyle = 'w-10 h-10 flex items-center justify-center bg-orange-500 text-white rounded-full shadow-md text-xl font-bold z-10';
+                        } else if (isErev) {
+                            badgeStyle = 'w-10 h-10 flex items-center justify-center bg-green-500 text-white rounded-full shadow-md text-xl font-bold z-10';
+                        } else if (isRoshChodesh) {
+                            badgeStyle = 'w-10 h-10 flex items-center justify-center bg-cyan-600 text-white rounded-full shadow-md text-xl font-bold z-10';
                         }
 
                         return (
@@ -120,16 +153,19 @@ export const CalendarWidget: React.FC = () => {
 
                                 {/* Jewish Day Number (opposite corner) */}
                                 {settings.showJewishCalendar && (
-                                    <span className={`absolute ${settings.language === 'he'
-                                        ? (settings.dayNumberAlign === 'left' ? 'top-4 left-4' : 'top-4 right-4') // RTL: Start is Right, so put Jewish on Left
-                                        : (settings.dayNumberAlign === 'left' ? 'top-4 right-4' : 'top-4 left-4') // LTR: Start is Left, so put Jewish on Right
-                                        } 
-                                        ${isRoshChodesh
-                                            ? 'w-10 h-10 flex items-center justify-center bg-cyan-600 text-white rounded-full shadow-md text-xl font-bold z-10'
-                                            : 'text-3xl font-bold text-text-muted opacity-60 font-serif'
-                                        }`}>
-                                        {jewishDayStr}
-                                    </span>
+                                    <>
+                                        <span className={`absolute ${settings.language === 'he'
+                                            ? (settings.dayNumberAlign === 'left' ? 'top-4 left-4' : 'top-4 right-4') // RTL: Start is Right, so put Jewish on Left
+                                            : (settings.dayNumberAlign === 'left' ? 'top-4 right-4' : 'top-4 left-4') // LTR: Start is Left, so put Jewish on Right
+                                            } ${badgeStyle}`}>
+                                            {jewishDayStr}
+                                        </span>
+                                        {holidayName && (
+                                            <div className="mt-auto text-xs font-semibold text-center text-primary/80 leading-tight w-full truncate">
+                                                {holidayName}
+                                            </div>
+                                        )}
+                                    </>
                                 )}
 
                                 {/* Optional event dot placeholder */}
@@ -191,8 +227,8 @@ export const CalendarWidget: React.FC = () => {
                             {/* Jewish Day Number (opposite corner) */}
                             {settings.showJewishCalendar && (
                                 <span className={`absolute ${settings.language === 'he'
-                                        ? 'top-4 left-4' // In Week View, items are centered typically, so put Jewish on Left (RTL Start = Right)
-                                        : 'top-4 right-4'
+                                    ? 'top-4 left-4' // In Week View, items are centered typically, so put Jewish on Left (RTL Start = Right)
+                                    : 'top-4 right-4'
                                     }  ${isRoshChodesh
                                         ? 'w-10 h-10 flex items-center justify-center bg-cyan-600 text-white rounded-full shadow-md text-xl font-bold z-10'
                                         : 'text-3xl font-bold text-text-muted opacity-60 font-serif'
