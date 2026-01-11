@@ -160,11 +160,13 @@ export const CalendarWidget: React.FC = () => {
 
                     // Jewish Date Calculation
                     let jewishDayStr = '';
+                    let isRoshChodesh = false;
                     if (settings.showJewishCalendar) {
                         const hdate = new HDate(day);
                         jewishDayStr = settings.language === 'he'
                             ? hdate.renderGematriya().split(' ')[0].replace(/'/g, '')
                             : hdate.getDate().toString();
+                        isRoshChodesh = hdate.getDate() === 1;
                     }
 
                     return (
@@ -189,9 +191,12 @@ export const CalendarWidget: React.FC = () => {
                             {/* Jewish Day Number (opposite corner) */}
                             {settings.showJewishCalendar && (
                                 <span className={`absolute ${settings.language === 'he'
-                                    ? 'top-4 left-4' // In Week View, items are centered typically, so put Jewish on Left (RTL Start = Right)
-                                    : 'top-4 right-4'
-                                    } text-3xl font-bold text-text-muted opacity-60 font-serif`}>
+                                        ? 'top-4 left-4' // In Week View, items are centered typically, so put Jewish on Left (RTL Start = Right)
+                                        : 'top-4 right-4'
+                                    }  ${isRoshChodesh
+                                        ? 'w-10 h-10 flex items-center justify-center bg-cyan-600 text-white rounded-full shadow-md text-xl font-bold z-10'
+                                        : 'text-3xl font-bold text-text-muted opacity-60 font-serif'
+                                    }`}>
                                     {jewishDayStr}
                                 </span>
                             )}

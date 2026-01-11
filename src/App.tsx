@@ -98,6 +98,17 @@ const DashboardContent: React.FC = () => {
                 [ChevronRight -> Next] [Title] [ChevronLeft -> Prev] 
             */}
 
+            {/* Reset / Jump to Today Button (Visible only if not current month) */}
+            {!isSameMonth(currentDate, new Date()) && (
+              <button
+                onClick={jumpToToday}
+                className="p-2 rounded-full bg-primary/10 text-primary hover:bg-primary/20 transition-all animate-in fade-in zoom-in"
+                title="Back to Today"
+              >
+                <RotateCcw size={24} />
+              </button>
+            )}
+
             <button
               onClick={() => navigate('next')}
               className="p-2 rounded-full hover:bg-surface-hover text-text-muted hover:text-text-main transition-colors"
@@ -117,15 +128,6 @@ const DashboardContent: React.FC = () => {
                 <span className="text-3xl font-light text-primary mt-1 opacity-80">
                   {jewishDateSubtitle}
                 </span>
-              )}
-
-              {/* Reset Button Indicator if not current month */}
-              {!isSameMonth(currentDate, new Date()) && (
-                <div className="absolute -right-12 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <div className="bg-primary/20 p-2 rounded-full text-primary hover:bg-primary/30">
-                    <RotateCcw size={20} />
-                  </div>
-                </div>
               )}
             </div>
 
