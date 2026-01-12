@@ -37,6 +37,76 @@ const TEXT_ALIGN_MAP: Record<string, string> = {
     right: 'text-right'
 };
 
+const HOLIDAY_ROOTS_RU = [
+    { root: 'Rosh Chodesh', ru: 'Рош Ходеш' },
+    { root: 'Rosh Hashana', ru: 'Рош а-Шана' },
+    { root: 'Yom Kippur', ru: 'Йом Кипур' },
+    { root: 'Sukkot', ru: 'Суккот' },
+    { root: 'Shmini Atzeret', ru: 'Шмини Ацерет' },
+    { root: 'Simchat Torah', ru: 'Симхат Тора' },
+    { root: 'Chanukah', ru: 'Ханука' },
+    { root: 'Tu BiShvat', ru: 'Ту би-Шват' },
+    { root: 'Purim', ru: 'Пурим' },
+    { root: 'Shushan Purim', ru: 'Шушан Пурим' },
+    { root: 'Pesach', ru: 'Песах' },
+    { root: 'Shavuot', ru: 'Шавуот' },
+    { root: "Tish'a B'Av", ru: '9 Ава' },
+    { root: 'Yom HaShoah', ru: 'День Катастрофы' },
+    { root: 'Yom HaZikaron', ru: 'День Памяти' },
+    { root: "Yom HaAtzma'ut", ru: 'День Независимости' },
+    { root: 'Lag BaOmer', ru: 'Лаг ба-Омер' },
+    { root: "Tu B'Av", ru: '15 Ава' },
+    { root: 'Shabbat Shekalim', ru: 'Шаббат Шекалим' },
+    { root: 'Shabbat Zachor', ru: 'Шаббат Захор' },
+    { root: 'Shabbat Parah', ru: 'Шаббат Пара' },
+    { root: 'Shabbat HaChodesh', ru: 'Шаббат а-Ходеш' },
+    { root: 'Shabbat Hagadol', ru: 'Шаббат а-Гадоль' },
+    { root: 'Shabbat Chazon', ru: 'Шаббат Хазон' },
+    { root: 'Shabbat Nachamu', ru: 'Шаббат Нахаму' },
+    { root: 'Ben-Gurion Day', ru: 'День Бен-Гуриона' },
+    { root: 'Yom Yerushalayim', ru: 'День Иерусалима' },
+    { root: 'Sigd', ru: 'Сигд' },
+    { root: 'Yom HaAliyah', ru: 'День Алии' },
+    { root: 'Pesach Sheni', ru: 'Песах Шени' },
+    { root: 'Shushan Purim Katan', ru: 'Шушан Пурим Катан' },
+    { root: "Asara B'Tevet", ru: '10 Тевета' },
+    { root: "Ta'anit Esther", ru: 'Пост Эстер' },
+    { root: 'Tzom Tammuz', ru: 'Пост 17 Таммуза' },
+    { root: 'Tzom Gedaliah', ru: 'Пост Гедалии' },
+    { root: 'Chag HaBanot', ru: 'Хаг а-Банот' },
+    { root: 'Hebrew Language Day', ru: 'День языка иврит' },
+    { root: 'Yom HaIvrit', ru: 'День языка иврит' }, // Alternative name
+    { root: 'Herzl Day', ru: 'День Герцеля' },
+    { root: 'Zeev Jabotinsky Day', ru: 'День Жаботинского' },
+    { root: 'Yitzhak Rabin Memorial Day', ru: 'День памяти Рабина' },
+    { root: 'Mimouna', ru: 'Мимуна' },
+    { root: 'Family Day', ru: 'День Семьи' },
+    { root: 'Leil Selichot', ru: 'Слихот' },
+    { root: 'Shabbat Shuva', ru: 'Шаббат Шува' },
+    { root: 'Shabbat Shirah', ru: 'Шаббат Шира' },
+];
+
+const getRussianHolidayName = (baseName: string) => {
+    // Check Erev prefix FIRST
+    const isErev = baseName.startsWith('Erev');
+
+    // Normalize for case-insensitive matching
+    const lowerBase = baseName.toLowerCase();
+
+    // Find matching root
+    const match = HOLIDAY_ROOTS_RU.find(item => lowerBase.includes(item.root.toLowerCase()));
+
+    if (match) {
+        let name = match.ru;
+        if (isErev) name = 'Канун ' + name;
+        // Optionally handle Chol HaMoed or specific days if needed, otherwise simplified name is better than English
+        if (baseName.includes('Chol ha-Moed')) name += ' (Хуль а-Моэд)';
+        return name;
+    }
+
+    return baseName; // Fallback
+};
+
 export const CalendarWidget: React.FC = () => {
     const { viewMode, settings, currentDate, getEventsForDate } = useAppStore();
     const [selectedDate, setSelectedDate] = useState<Date | null>(null);
@@ -109,7 +179,11 @@ export const CalendarWidget: React.FC = () => {
 
                                 const primaryEvent = events.find(e => (e.getFlags() & flags.CHAG) || (e.getFlags() & flags.CHOL_HAMOED) || (e.getFlags() & flags.EREV) || e.basename() === "Yom HaAtzma'ut") || events[0];
                                 if (primaryEvent) {
-                                    holidayName = primaryEvent.render(settings.language === 'he' ? 'he' : 'en');
+                                    if (settings.language === 'ru') {
+                                        holidayName = getRussianHolidayName(primaryEvent.basename());
+                                    } else {
+                                        holidayName = primaryEvent.render(settings.language === 'he' ? 'he' : 'en');
+                                    }
                                 }
                             }
                         }
@@ -219,7 +293,11 @@ export const CalendarWidget: React.FC = () => {
 
                             const primaryEvent = events.find(e => (e.getFlags() & flags.CHAG) || (e.getFlags() & flags.CHOL_HAMOED) || (e.getFlags() & flags.EREV) || e.basename() === "Yom HaAtzma'ut") || events[0];
                             if (primaryEvent) {
-                                holidayName = primaryEvent.render(settings.language === 'he' ? 'he' : 'en');
+                                if (settings.language === 'ru') {
+                                    holidayName = getRussianHolidayName(primaryEvent.basename());
+                                } else {
+                                    holidayName = primaryEvent.render(settings.language === 'he' ? 'he' : 'en');
+                                }
                             }
                         }
                     }
@@ -260,8 +338,8 @@ export const CalendarWidget: React.FC = () => {
                             {settings.showJewishCalendar && (
                                 <>
                                     <span className={`absolute ${settings.language === 'he'
-                                            ? 'top-4 left-4'
-                                            : 'top-4 right-4'
+                                        ? 'top-4 left-4'
+                                        : 'top-4 right-4'
                                         } ${badgeStyle}`}>
                                         {jewishDayStr}
                                     </span>

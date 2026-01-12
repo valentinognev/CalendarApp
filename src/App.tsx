@@ -43,15 +43,41 @@ const DashboardContent: React.FC = () => {
     const hStart = new HDate(startDate);
     const hEnd = new HDate(endDate);
 
+    const JEWISH_MONTHS_RU: Record<string, string> = {
+      'Nisan': 'Нисан',
+      'Iyyar': 'Ияр',
+      'Sivan': 'Сиван',
+      'Tamuz': 'Таммуз',
+      'Av': 'Ав',
+      'Elul': 'Элуль',
+      'Tishrei': 'Тишрей',
+      'Cheshvan': 'Хешван',
+      'Kislev': 'Кислев',
+      'Tevet': 'Тевет',
+      'Sh\'vat': 'Шват',
+      'Adar': 'Адар',
+      'Adar I': 'Адар I',
+      'Adar II': 'Адар II'
+    };
+
     // Helper to get formatted month/year
     const getHString = (h: HDate) => {
       if (settings.language === 'he') {
-        // Custom extraction from gematriya string: "Day Month Year" -> "Month Year"
         const parts = h.renderGematriya(true).split(' ');
         return {
-          month: parts.slice(1, -1).join(' '), // Middle part(s) are month
-          year: parts[parts.length - 1],       // Last part is year
-          full: parts.slice(1).join(' ')       // Month + Year
+          month: parts.slice(1, -1).join(' '),
+          year: parts[parts.length - 1],
+          full: parts.slice(1).join(' ')
+        };
+      } else if (settings.language === 'ru') {
+        const monthName = h.getMonthName();
+        // Handle "Adar I" / "Adar II" vs "Adar"
+        // Hebcal returns "Adar" in common years.
+        const translatedMonth = JEWISH_MONTHS_RU[monthName] || monthName;
+        return {
+          month: translatedMonth,
+          year: h.getFullYear().toString(),
+          full: `${translatedMonth} ${h.getFullYear()}`
         };
       } else {
         return {
