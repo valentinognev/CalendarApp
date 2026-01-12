@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAppStore } from '../../store/AppContext';
 import { startOfMonth, endOfMonth, startOfWeek, endOfWeek, eachDayOfInterval, format, isSameMonth, isToday, isWeekend } from 'date-fns';
 import { enUS, ru, he } from 'date-fns/locale';
-import { HDate, HebrewCalendar, flags } from '@hebcal/core';
+import { HDate } from '@hebcal/core';
 import { EventModal } from '../events/EventModal';
+import { fetchJewishHolidays, type JewishHoliday } from '../../services/JewishHolidayService';
 
 const LOCALE_MAP: Record<string, any> = {
     en: enUS,
@@ -37,79 +38,18 @@ const TEXT_ALIGN_MAP: Record<string, string> = {
     right: 'text-right'
 };
 
-const HOLIDAY_ROOTS_RU = [
-    { root: 'Rosh Chodesh', ru: 'Рош Ходеш' },
-    { root: 'Rosh Hashana', ru: 'Рош а-Шана' },
-    { root: 'Yom Kippur', ru: 'Йом Кипур' },
-    { root: 'Sukkot', ru: 'Суккот' },
-    { root: 'Shmini Atzeret', ru: 'Шмини Ацерет' },
-    { root: 'Simchat Torah', ru: 'Симхат Тора' },
-    { root: 'Chanukah', ru: 'Ханука' },
-    { root: 'Tu BiShvat', ru: 'Ту би-Шват' },
-    { root: 'Purim', ru: 'Пурим' },
-    { root: 'Shushan Purim', ru: 'Шушан Пурим' },
-    { root: 'Pesach', ru: 'Песах' },
-    { root: 'Shavuot', ru: 'Шавуот' },
-    { root: "Tish'a B'Av", ru: '9 Ава' },
-    { root: 'Yom HaShoah', ru: 'День Катастрофы' },
-    { root: 'Yom HaZikaron', ru: 'День Памяти' },
-    { root: "Yom HaAtzma'ut", ru: 'День Независимости' },
-    { root: 'Lag BaOmer', ru: 'Лаг ба-Омер' },
-    { root: "Tu B'Av", ru: '15 Ава' },
-    { root: 'Shabbat Shekalim', ru: 'Шаббат Шекалим' },
-    { root: 'Shabbat Zachor', ru: 'Шаббат Захор' },
-    { root: 'Shabbat Parah', ru: 'Шаббат Пара' },
-    { root: 'Shabbat HaChodesh', ru: 'Шаббат а-Ходеш' },
-    { root: 'Shabbat Hagadol', ru: 'Шаббат а-Гадоль' },
-    { root: 'Shabbat Chazon', ru: 'Шаббат Хазон' },
-    { root: 'Shabbat Nachamu', ru: 'Шаббат Нахаму' },
-    { root: 'Ben-Gurion Day', ru: 'День Бен-Гуриона' },
-    { root: 'Yom Yerushalayim', ru: 'День Иерусалима' },
-    { root: 'Sigd', ru: 'Сигд' },
-    { root: 'Yom HaAliyah', ru: 'День Алии' },
-    { root: 'Pesach Sheni', ru: 'Песах Шени' },
-    { root: 'Shushan Purim Katan', ru: 'Шушан Пурим Катан' },
-    { root: "Asara B'Tevet", ru: '10 Тевета' },
-    { root: "Ta'anit Esther", ru: 'Пост Эстер' },
-    { root: 'Tzom Tammuz', ru: 'Пост 17 Таммуза' },
-    { root: 'Tzom Gedaliah', ru: 'Пост Гедалии' },
-    { root: 'Chag HaBanot', ru: 'Хаг а-Банот' },
-    { root: 'Hebrew Language Day', ru: 'День языка иврит' },
-    { root: 'Yom HaIvrit', ru: 'День языка иврит' }, // Alternative name
-    { root: 'Herzl Day', ru: 'День Герцеля' },
-    { root: 'Zeev Jabotinsky Day', ru: 'День Жаботинского' },
-    { root: 'Yitzhak Rabin Memorial Day', ru: 'День памяти Рабина' },
-    { root: 'Mimouna', ru: 'Мимуна' },
-    { root: 'Family Day', ru: 'День Семьи' },
-    { root: 'Leil Selichot', ru: 'Слихот' },
-    { root: 'Shabbat Shuva', ru: 'Шаббат Шува' },
-    { root: 'Shabbat Shirah', ru: 'Шаббат Шира' },
-];
-
-const getRussianHolidayName = (baseName: string) => {
-    // Check Erev prefix FIRST
-    const isErev = baseName.startsWith('Erev');
-
-    // Normalize for case-insensitive matching
-    const lowerBase = baseName.toLowerCase();
-
-    // Find matching root
-    const match = HOLIDAY_ROOTS_RU.find(item => lowerBase.includes(item.root.toLowerCase()));
-
-    if (match) {
-        let name = match.ru;
-        if (isErev) name = 'Канун ' + name;
-        // Optionally handle Chol HaMoed or specific days if needed, otherwise simplified name is better than English
-        if (baseName.includes('Chol ha-Moed')) name += ' (Хуль а-Моэд)';
-        return name;
-    }
-
-    return baseName; // Fallback
-};
-
 export const CalendarWidget: React.FC = () => {
     const { viewMode, settings, currentDate, getEventsForDate } = useAppStore();
     const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+    const [csvHolidays, setCsvHolidays] = useState<JewishHoliday[]>([]);
+
+    useEffect(() => {
+        const loadHolidays = async () => {
+            const data = await fetchJewishHolidays();
+            setCsvHolidays(data);
+        };
+        loadHolidays();
+    }, []);
 
     const currentLocale = LOCALE_MAP[settings.language];
     const weekStartParams = { weekStartsOn: settings.weekStart as 0 | 1, locale: currentLocale };
@@ -152,7 +92,6 @@ export const CalendarWidget: React.FC = () => {
                         const isDayWeekend = isWeekend(day);
                         const dayEvents = getEventsForDate(day);
 
-                        // Check Weekend Highlight Setting
                         const shouldHighlightWeekend =
                             (settings.highlightWeekend === 'both' && isDayWeekend) ||
                             (settings.highlightWeekend === 'sat' && day.getDay() === 6) ||
@@ -164,6 +103,8 @@ export const CalendarWidget: React.FC = () => {
                         let isHoliday = false;
                         let isErev = false;
                         let isCholHaMoed = false;
+                        let isFast = false;
+                        let isOfficial = false;
                         let holidayName = '';
 
                         if (settings.showJewishCalendar) {
@@ -171,29 +112,42 @@ export const CalendarWidget: React.FC = () => {
                             jewishDayStr = hdate.renderGematriya().split(' ')[0].replace(/'/g, '');
                             isRoshChodesh = hdate.getDate() === 1;
 
-                            const events = HebrewCalendar.getHolidaysOnDate(hdate) || [];
-                            if (events.length > 0) {
-                                isHoliday = events.some(e => (e.getFlags() & flags.CHAG) !== 0 || e.basename() === "Yom HaAtzma'ut");
-                                isErev = events.some(e => (e.getFlags() & flags.EREV) !== 0);
-                                isCholHaMoed = events.some(e => (e.getFlags() & flags.CHOL_HAMOED) !== 0);
+                            // Lookup in CSV
+                            const monthName = hdate.getMonthName();
+                            const dayNum = hdate.getDate();
 
-                                const primaryEvent = events.find(e => (e.getFlags() & flags.CHAG) || (e.getFlags() & flags.CHOL_HAMOED) || (e.getFlags() & flags.EREV) || e.basename() === "Yom HaAtzma'ut") || events[0];
-                                if (primaryEvent) {
-                                    if (settings.language === 'ru') {
-                                        holidayName = getRussianHolidayName(primaryEvent.basename());
-                                    } else {
-                                        holidayName = primaryEvent.render(settings.language === 'he' ? 'he' : 'en');
-                                    }
+                            const csvMatch = csvHolidays.find(h => h.month === monthName && h.day === dayNum);
+
+                            if (csvMatch) {
+                                isHoliday = csvMatch.type === 'holiday';
+                                isFast = csvMatch.type === 'fast';
+                                isCholHaMoed = csvMatch.type === 'chol_hamoed';
+                                isOfficial = csvMatch.official;
+
+                                // Name based on language
+                                if (settings.language === 'ru') holidayName = csvMatch.nameRu;
+                                else if (settings.language === 'he') holidayName = csvMatch.nameHe;
+                                else holidayName = csvMatch.nameEn;
+                            } else {
+                                // Fallback logic for Rosh Chodesh if not in CSV
+                                if (isRoshChodesh) {
+                                    // Default Rosh Chodesh name if not in CSV
+                                    if (settings.language === 'ru') holidayName = 'Рош Ходеш';
+                                    else if (settings.language === 'he') holidayName = 'ראש חודש';
+                                    else holidayName = 'Rosh Chodesh';
                                 }
                             }
                         }
 
                         // Badge Style Determination
                         let badgeStyle = 'text-3xl font-bold text-text-muted opacity-60 font-serif';
+
                         if (isHoliday) {
                             badgeStyle = 'w-10 h-10 flex items-center justify-center bg-red-500 text-white rounded-full shadow-md text-xl font-bold z-10';
                         } else if (isCholHaMoed) {
                             badgeStyle = 'w-10 h-10 flex items-center justify-center bg-orange-500 text-white rounded-full shadow-md text-xl font-bold z-10';
+                        } else if (isFast) {
+                            badgeStyle = 'w-10 h-10 flex items-center justify-center bg-amber-700 text-white rounded-full shadow-md text-xl font-bold z-10'; // Dark orange/brown for fasts?
                         } else if (isErev) {
                             badgeStyle = 'w-10 h-10 flex items-center justify-center bg-green-500 text-white rounded-full shadow-md text-xl font-bold z-10';
                         } else if (isRoshChodesh) {
@@ -213,6 +167,7 @@ export const CalendarWidget: React.FC = () => {
                                             ? 'bg-surface-hover border border-border'
                                             : 'bg-surface border border-transparent'}
                                   ${!isCurrentMonth ? 'opacity-30' : ''}
+                                  ${isOfficial ? 'ring-1 ring-yellow-500/50' : ''} 
                                 `}
                             >
                                 <span className={`font-bold mb-auto ${SIZE_MAP[settings.dayNumberSize]} ${isDayToday ? 'text-primary' : shouldHighlightWeekend ? 'text-red-600 dark:text-red-400' : 'text-text-main'}`}>
@@ -278,26 +233,38 @@ export const CalendarWidget: React.FC = () => {
                     let isHoliday = false;
                     let isErev = false;
                     let isCholHaMoed = false;
+                    let isFast = false;
+                    let isOfficial = false;
                     let holidayName = '';
 
                     if (settings.showJewishCalendar) {
                         const hdate = new HDate(day);
-                        jewishDayStr = hdate.renderGematriya().split(' ')[0].replace(/'/g, ''); // Always Gematriya
+                        jewishDayStr = hdate.renderGematriya().split(' ')[0].replace(/'/g, '');
                         isRoshChodesh = hdate.getDate() === 1;
 
-                        const events = HebrewCalendar.getHolidaysOnDate(hdate) || [];
-                        if (events.length > 0) {
-                            isHoliday = events.some(e => (e.getFlags() & flags.CHAG) !== 0 || e.basename() === "Yom HaAtzma'ut");
-                            isErev = events.some(e => (e.getFlags() & flags.EREV) !== 0);
-                            isCholHaMoed = events.some(e => (e.getFlags() & flags.CHOL_HAMOED) !== 0);
+                        // Lookup in CSV
+                        const monthName = hdate.getMonthName();
+                        const dayNum = hdate.getDate();
 
-                            const primaryEvent = events.find(e => (e.getFlags() & flags.CHAG) || (e.getFlags() & flags.CHOL_HAMOED) || (e.getFlags() & flags.EREV) || e.basename() === "Yom HaAtzma'ut") || events[0];
-                            if (primaryEvent) {
-                                if (settings.language === 'ru') {
-                                    holidayName = getRussianHolidayName(primaryEvent.basename());
-                                } else {
-                                    holidayName = primaryEvent.render(settings.language === 'he' ? 'he' : 'en');
-                                }
+                        const csvMatch = csvHolidays.find(h => h.month === monthName && h.day === dayNum);
+
+                        if (csvMatch) {
+                            isHoliday = csvMatch.type === 'holiday';
+                            isFast = csvMatch.type === 'fast';
+                            isCholHaMoed = csvMatch.type === 'chol_hamoed';
+                            isOfficial = csvMatch.official;
+
+                            // Name based on language
+                            if (settings.language === 'ru') holidayName = csvMatch.nameRu;
+                            else if (settings.language === 'he') holidayName = csvMatch.nameHe;
+                            else holidayName = csvMatch.nameEn;
+                        } else {
+                            // Fallback logic for Rosh Chodesh if not in CSV
+                            if (isRoshChodesh) {
+                                // Default Rosh Chodesh name if not in CSV
+                                if (settings.language === 'ru') holidayName = 'Рош Ходеш';
+                                else if (settings.language === 'he') holidayName = 'ראש חודש';
+                                else holidayName = 'Rosh Chodesh';
                             }
                         }
                     }
@@ -308,6 +275,8 @@ export const CalendarWidget: React.FC = () => {
                         badgeStyle = 'w-10 h-10 flex items-center justify-center bg-red-500 text-white rounded-full shadow-md text-xl font-bold z-10';
                     } else if (isCholHaMoed) {
                         badgeStyle = 'w-10 h-10 flex items-center justify-center bg-orange-500 text-white rounded-full shadow-md text-xl font-bold z-10';
+                    } else if (isFast) {
+                        badgeStyle = 'w-10 h-10 flex items-center justify-center bg-amber-700 text-white rounded-full shadow-md text-xl font-bold z-10';
                     } else if (isErev) {
                         badgeStyle = 'w-10 h-10 flex items-center justify-center bg-green-500 text-white rounded-full shadow-md text-xl font-bold z-10';
                     } else if (isRoshChodesh) {
@@ -325,6 +294,7 @@ export const CalendarWidget: React.FC = () => {
                                     : shouldHighlightWeekend
                                         ? 'bg-surface-hover border-border'
                                         : 'bg-surface/50 border-transparent'}
+                                ${isOfficial ? 'ring-1 ring-yellow-500/50' : ''}
                               `}
                         >
                             <span className={`text-text-muted font-bold uppercase tracking-widest mb-2 ${NAME_SIZE_MAP[settings.dayNameSize] || 'text-xs'} `}>
