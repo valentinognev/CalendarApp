@@ -7,13 +7,19 @@ import { MediaPanel } from './components/widgets/MediaPanel';
 import { SettingsModal } from './components/settings/SettingsModal';
 import { Calendar as CalIcon, Settings, ChevronLeft, ChevronRight, Image as ImageIcon, RotateCcw } from 'lucide-react';
 import { format, startOfMonth, endOfMonth, startOfWeek, endOfWeek, isSameMonth } from 'date-fns';
-import { enUS, ru, he } from 'date-fns/locale';
+import {
+  enUS, ru, he, zhCN, hi, es, fr, ar, bn, pt, id, de, ja, te, tr, ta, ko, vi, it, th, faIR, pl, uk, ro, nl, el, hu, sv, cs, da, fi, nb, sk, hr, bg, sl, lt, lv, et, sr, ca, ms, gu, kn
+} from 'date-fns/locale';
 import { HDate } from '@hebcal/core';
 
 const LOCALE_MAP: Record<string, any> = {
-  en: enUS,
-  ru: ru,
-  he: he
+  en: enUS, zh: zhCN, hi: hi, es: es, fr: fr, ar: ar, bn: bn, pt: pt, ru: ru,
+  id: id, de: de, ja: ja, te: te, tr: tr, ta: ta, ko: ko,
+  vi: vi, it: it, th: th, fa: faIR, pl: pl, uk: uk, ro: ro, nl: nl, el: el, hu: hu,
+  sv: sv, cs: cs, da: da, fi: fi, he: he, no: nb, sk: sk, hr: hr, bg: bg, sl: sl,
+  lt: lt, lv: lv, et: et, sr: sr, ca: ca, ms: ms, gu: gu, kn: kn,
+  // Fallbacks
+  ur: enUS, sw: enUS, mr: enUS, pa: enUS, fil: enUS, am: enUS
 };
 
 const UI_LABELS: Record<string, { month: string; week: string; split: string }> = {
@@ -26,8 +32,8 @@ const DashboardContent: React.FC = () => {
   const { viewMode, toggleView, toggleSplit, isSplit, currentDate, navigate, jumpToToday, settings } = useAppStore();
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
-  const currentLocale = LOCALE_MAP[settings.language];
-  const labels = UI_LABELS[settings.language];
+  const currentLocale = LOCALE_MAP[settings.language] || enUS;
+  const labels = UI_LABELS[settings.language] || UI_LABELS['en'];
 
   const headerTitle = format(currentDate, viewMode === 'month' ? 'LLLL yyyy' : "'Week of' MMM d, yyyy", { locale: currentLocale });
 

@@ -1,9 +1,7 @@
 export interface JewishHoliday {
     month: string;
     day: number;
-    nameEn: string;
-    nameRu: string;
-    nameHe: string;
+    names: Record<string, string>;
     type: 'holiday' | 'fast' | 'minor' | 'erev' | 'rosh_chodesh' | 'chol_hamoed';
     official: boolean;
 }
@@ -23,28 +21,48 @@ const parseCSV = (csvText: string): JewishHoliday[] => {
     const lines = csvText.split('\n');
     const holidays: JewishHoliday[] = [];
 
-    // Skip header row
+    if (lines.length < 2) return [];
+
+    // Parse Headers
+    const headerLine = lines[0].trim();
+    const headers = parseLine(headerLine);
+
+    // Identify name columns (name_en, name_ru, etc.)
+    const nameIndexes: Record<string, number> = {};
+    headers.forEach((h, i) => {
+        if (h.startsWith('name_')) {
+            const lang = h.replace('name_', '');
+            nameIndexes[lang] = i;
+        }
+    });
+
+    // Parse Rows
     for (let i = 1; i < lines.length; i++) {
         const line = lines[i].trim();
         if (!line) continue;
 
-        const parts = line.split(',');
-        // Handle potential extra commas in names/notes by not strictly checking length, but ensuring main fields exist
+        const parts = parseLine(line);
+        // Script format: Month,Day,Type,Official,name_en,...
+
         const month = parts[0]?.trim();
         const dayStr = parts[1]?.trim();
-        const nameEn = parts[2]?.trim();
-        const nameRu = parts[3]?.trim();
-        const nameHe = parts[4]?.trim();
-        const type = parts[5]?.trim();
-        const officialStr = parts[6]?.trim();
+        const type = parts[2]?.trim();
+        const officialStr = parts[3]?.trim();
 
         if (month && dayStr) {
+            const names: Record<string, string> = {};
+
+            // Extract all languages
+            for (const [lang, idx] of Object.entries(nameIndexes)) {
+                if (parts[idx]) {
+                    names[lang] = parts[idx].trim();
+                }
+            }
+
             holidays.push({
                 month: month,
                 day: parseInt(dayStr, 10),
-                nameEn: nameEn || '',
-                nameRu: nameRu || '',
-                nameHe: nameHe || '',
+                names: names,
                 type: (type as any) || 'minor',
                 official: officialStr?.toLowerCase() === 'true'
             });
@@ -52,4 +70,25 @@ const parseCSV = (csvText: string): JewishHoliday[] => {
     }
 
     return holidays;
+};
+
+// Helper to handle CSV lines with quotes
+const parseLine = (line: string): string[] => {
+    const result: string[] = [];
+    let current = '';
+    let inQuotes = false;
+
+    for (let i = 0; i < line.length; i++) {
+        const char = line[i];
+        if (char === '"') {
+            inQuotes = !inQuotes;
+        } else if (char === ',' && !inQuotes) {
+            result.push(current);
+            current = '';
+        } else {
+            current += char;
+        }
+    }
+    result.push(current);
+    return result.map(c => c.replace(/^"|"$/g, '').trim()); // Clean quotes
 };

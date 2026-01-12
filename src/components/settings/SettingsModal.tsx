@@ -106,9 +106,63 @@ interface SettingsModalProps {
     onClose: () => void;
 }
 
+const LANGUAGE_OPTIONS = [
+    { code: 'en', name: 'English' },
+    { code: 'zh', name: 'Chinese (中文)' },
+    { code: 'hi', name: 'Hindi (हिन्दी)' },
+    { code: 'es', name: 'Spanish (Español)' },
+    { code: 'fr', name: 'French (Français)' },
+    { code: 'ar', name: 'Arabic (العربية)' },
+    { code: 'bn', name: 'Bengali (বাংলা)' },
+    { code: 'pt', name: 'Portuguese (Português)' },
+    { code: 'ru', name: 'Russian (Русский)' },
+    { code: 'ur', name: 'Urdu (اردو)' },
+    { code: 'id', name: 'Indonesian (Bahasa Indonesia)' },
+    { code: 'de', name: 'German (Deutsch)' },
+    { code: 'ja', name: 'Japanese (日本語)' },
+    { code: 'sw', name: 'Swahili (Kiswahili)' },
+    { code: 'mr', name: 'Marathi (मराठी)' },
+    { code: 'te', name: 'Telugu (తెలుగు)' },
+    { code: 'tr', name: 'Turkish (Türkçe)' },
+    { code: 'ta', name: 'Tamil (தமிழ்)' },
+    { code: 'pa', name: 'Punjabi (ਪੰਜਾਬੀ)' },
+    { code: 'ko', name: 'Korean (한국어)' },
+    { code: 'vi', name: 'Vietnamese (Tiếng Việt)' },
+    { code: 'it', name: 'Italian (Italiano)' },
+    { code: 'th', name: 'Thai (ไทย)' },
+    { code: 'fa', name: 'Persian (فارسی)' },
+    { code: 'pl', name: 'Polish (Polski)' },
+    { code: 'uk', name: 'Ukrainian (Українська)' },
+    { code: 'ro', name: 'Romanian (Română)' },
+    { code: 'nl', name: 'Dutch (Nederlands)' },
+    { code: 'el', name: 'Greek (Ελληνικά)' },
+    { code: 'hu', name: 'Hungarian (Magyar)' },
+    { code: 'sv', name: 'Swedish (Svenska)' },
+    { code: 'cs', name: 'Czech (Čeština)' },
+    { code: 'da', name: 'Danish (Dansk)' },
+    { code: 'fi', name: 'Finnish (Suomi)' },
+    { code: 'he', name: 'Hebrew (עברית)' },
+    { code: 'no', name: 'Norwegian (Norsk)' },
+    { code: 'sk', name: 'Slovak (Slovenčina)' },
+    { code: 'hr', name: 'Croatian (Hrvatski)' },
+    { code: 'bg', name: 'Bulgarian (Български)' },
+    { code: 'sl', name: 'Slovenian (Slovenščina)' },
+    { code: 'lt', name: 'Lithuanian (Lietuvių)' },
+    { code: 'lv', name: 'Latvian (Latviešu)' },
+    { code: 'et', name: 'Estonian (Eesti)' },
+    { code: 'sr', name: 'Serbian (Српски)' },
+    { code: 'ca', name: 'Catalan (Català)' },
+    { code: 'ms', name: 'Malay (Bahasa Melayu)' },
+    { code: 'fil', name: 'Filipino (Filipino)' },
+    { code: 'am', name: 'Amharic (አማርኛ)' },
+    { code: 'gu', name: 'Gujarati (ગુજરાતી)' },
+    { code: 'kn', name: 'Kannada (ಕನ್ನಡ)' }
+];
+
 export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose }) => {
     const { settings, updateSettings } = useAppStore();
-    const t = TRANSLATIONS[settings.language];
+    // Fallback to English for UI if translation not available
+    const t = TRANSLATIONS[settings.language] || TRANSLATIONS['en'];
 
     if (!isOpen) return null;
 
@@ -192,9 +246,9 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
                                     value={settings.language}
                                     onChange={(e) => updateSettings({ language: e.target.value as Language })}
                                 >
-                                    <option value="en">English</option>
-                                    <option value="ru">Русский</option>
-                                    <option value="he">עברית</option>
+                                    {LANGUAGE_OPTIONS.map(lang => (
+                                        <option key={lang.code} value={lang.code}>{lang.name}</option>
+                                    ))}
                                 </select>
                             </div>
 

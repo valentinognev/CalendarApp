@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, useEffect, type ReactNode }
 import { addMonths, subMonths, addWeeks, subWeeks, isSameDay, startOfDay } from 'date-fns';
 
 type ViewMode = 'month' | 'week';
-export type Language = 'en' | 'ru' | 'he';
+export type Language = string; // Support dynamic languages
 export type Theme = 'dark' | 'light';
 export type Direction = 'ltr' | 'rtl';
 export type Alignment = 'left' | 'center' | 'right';

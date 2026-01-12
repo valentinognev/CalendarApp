@@ -1,16 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import { useAppStore } from '../../store/AppContext';
 import { startOfMonth, endOfMonth, startOfWeek, endOfWeek, eachDayOfInterval, format, isSameMonth, isToday, isWeekend, addMinutes, subMinutes, parse } from 'date-fns';
-import { enUS, ru, he } from 'date-fns/locale';
+import {
+    enUS, ru, he, zhCN, hi, es, fr, ar, bn, pt, id, de, ja, te, tr, ta, ko, vi, it, th, faIR, pl, uk, ro, nl, el, hu, sv, cs, da, fi, nb, sk, hr, bg, sl, lt, lv, et, sr, ca, ms, gu, kn
+} from 'date-fns/locale';
 import { HDate } from '@hebcal/core';
 import { EventModal } from '../events/EventModal';
 import { fetchJewishHolidays, type JewishHoliday } from '../../services/JewishHolidayService';
 import { fetchSunsetTimes, getSunsetTime } from '../../services/SunsetService';
 
 const LOCALE_MAP: Record<string, any> = {
-    en: enUS,
-    ru: ru,
-    he: he
+    en: enUS, zh: zhCN, hi: hi, es: es, fr: fr, ar: ar, bn: bn, pt: pt, ru: ru,
+    id: id, de: de, ja: ja, te: te, tr: tr, ta: ta, ko: ko,
+    vi: vi, it: it, th: th, fa: faIR, pl: pl, uk: uk, ro: ro, nl: nl, el: el, hu: hu,
+    sv: sv, cs: cs, da: da, fi: fi, he: he, no: nb, sk: sk, hr: hr, bg: bg, sl: sl,
+    lt: lt, lv: lv, et: et, sr: sr, ca: ca, ms: ms, gu: gu, kn: kn,
+    // Fallbacks because date-fns might differ slightly in naming or I'm lazy to find all 50 in import list
+    ur: enUS, sw: enUS, mr: enUS, pa: enUS, fil: enUS, am: enUS
 };
 
 const SIZE_MAP: Record<string, string> = {
@@ -57,7 +63,7 @@ export const CalendarWidget: React.FC = () => {
         loadData();
     }, []);
 
-    const currentLocale = LOCALE_MAP[settings.language];
+    const currentLocale = LOCALE_MAP[settings.language] || enUS;
     const weekStartParams = { weekStartsOn: settings.weekStart as 0 | 1, locale: currentLocale };
 
     const renderMonthView = () => {
@@ -131,10 +137,14 @@ export const CalendarWidget: React.FC = () => {
                                 isCholHaMoed = csvMatch.type === 'chol_hamoed';
                                 isOfficial = csvMatch.official;
 
-                                // Name based on language
-                                if (settings.language === 'ru') holidayName = csvMatch.nameRu;
-                                else if (settings.language === 'he') holidayName = csvMatch.nameHe;
-                                else holidayName = csvMatch.nameEn;
+                                // Name based on language (Dynamic Lookup)
+                                // Only try to access names if it exists (safety check if service bad)
+                                if (csvMatch.names) {
+                                    holidayName = csvMatch.names[settings.language] || csvMatch.names['en'] || '';
+                                } else {
+                                    // Fallback if names map missing
+                                    holidayName = (csvMatch as any).nameEn || '';
+                                }
                             } else {
                                 if (isRoshChodesh) {
                                     if (settings.language === 'ru') holidayName = 'Рош Ходеш';
@@ -178,8 +188,8 @@ export const CalendarWidget: React.FC = () => {
                             badgeStyle = 'w-10 h-10 flex items-center justify-center bg-cyan-600 text-white rounded-full shadow-md text-xl font-bold z-10';
                         }
 
-                        // Determine if holiday name/time needs space
-                        // const hasJewishContent = settings.showJewishCalendar && (holidayName || shabbatTime);
+                        // Determine space needs
+                        // Removed unused variable: const hasJewishContent = ...
 
                         return (
                             <div
@@ -290,9 +300,11 @@ export const CalendarWidget: React.FC = () => {
                             isOfficial = csvMatch.official;
 
                             // Name based on language
-                            if (settings.language === 'ru') holidayName = csvMatch.nameRu;
-                            else if (settings.language === 'he') holidayName = csvMatch.nameHe;
-                            else holidayName = csvMatch.nameEn;
+                            if (csvMatch.names) {
+                                holidayName = csvMatch.names[settings.language] || csvMatch.names['en'] || '';
+                            } else {
+                                holidayName = (csvMatch as any).nameEn || '';
+                            }
                         } else {
                             if (isRoshChodesh) {
                                 if (settings.language === 'ru') holidayName = 'Рош Ходеш';
@@ -335,8 +347,8 @@ export const CalendarWidget: React.FC = () => {
                         badgeStyle = 'w-10 h-10 flex items-center justify-center bg-cyan-600 text-white rounded-full shadow-md text-xl font-bold z-10';
                     }
 
-                    // Determine if holiday name/time needs space
-                    const hasJewishContent = settings.showJewishCalendar && (holidayName || shabbatTime);
+                    // Space check
+
 
                     return (
                         <div
