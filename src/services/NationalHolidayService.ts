@@ -71,7 +71,8 @@ export const fetchNationalHolidays = async (filename: string): Promise<NationalH
             const c = col.toLowerCase();
             // Store if it's not a standard column and looks like a lang code or just extra
             if (idx !== dateIdx && idx !== nameIdx && idx !== typeIdx && idx !== calIdx && c) {
-                langMap[idx] = c;
+                // Normalize: he-ISR -> he
+                langMap[idx] = c.split('-')[0];
             }
         });
 

@@ -216,8 +216,14 @@ const DashboardContent: React.FC = () => {
           >
             <ImageIcon size={20} />
             <span>{t.splitView}</span>
-            <span className="absolute -top-2 -right-2 bg-surface border border-border text-[10px] font-bold px-1.5 py-0.5 rounded-full shadow-md uppercase tracking-wider text-text-muted">
-              {settings.language}
+            <span className="absolute -top-2 -right-2 bg-surface border border-border text-[10px] font-bold px-1.5 py-0.5 rounded-full shadow-md uppercase tracking-wider text-text-muted flex items-center gap-1">
+              <span>{settings.language}</span>
+              {settings.country && (
+                <>
+                  <span className="opacity-50">|</span>
+                  <span>{settings.country.substring(0, 3)}</span>
+                </>
+              )}
             </span>
           </button>
         </div>

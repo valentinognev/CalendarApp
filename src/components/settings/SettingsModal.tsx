@@ -180,7 +180,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
                                     value={settings.country || ''}
                                     onChange={(e) => updateSettings({ country: e.target.value })}
                                 >
-                                    <option value="" disabled>Select Country...</option>
+                                    <option value="">None</option>
                                     {countries.map((c) => (
                                         <option key={c.country} value={c.country}>
                                             {c.country}
