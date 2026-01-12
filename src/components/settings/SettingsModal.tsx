@@ -13,6 +13,8 @@ const TRANSLATIONS: Record<string, Record<string, string>> = {
         weekendNone: 'None',
         weekendSat: 'Saturday',
         weekendSun: 'Sunday',
+        weekendFri: 'Friday',
+        weekendFriSat: 'Friday & Saturday',
         weekendBoth: 'Both (Sat & Sun)',
         regionalTitle: 'Regional',
         language: 'Language',
@@ -45,6 +47,8 @@ const TRANSLATIONS: Record<string, Record<string, string>> = {
         weekendNone: 'Нет',
         weekendSat: 'Суббота',
         weekendSun: 'Воскресенье',
+        weekendFri: 'Пятница',
+        weekendFriSat: 'Пт & Сб',
         weekendBoth: 'Оба (Сб & Вс)',
         regionalTitle: 'Региональные',
         language: 'Язык',
@@ -77,6 +81,8 @@ const TRANSLATIONS: Record<string, Record<string, string>> = {
         weekendNone: 'ללא',
         weekendSat: 'שבת',
         weekendSun: 'ראשון',
+        weekendFri: 'שישי',
+        weekendFriSat: 'שישי ושבת',
         weekendBoth: 'שניהם (שבת וראשון)',
         regionalTitle: 'אזוריות',
         language: 'שפה',
@@ -225,6 +231,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
                                     <option value="none">{t.weekendNone}</option>
                                     <option value="sat">{t.weekendSat}</option>
                                     <option value="sun">{t.weekendSun}</option>
+                                    <option value="fri">{t.weekendFri}</option>
+                                    <option value="fri-sat">{t.weekendFriSat}</option>
                                     <option value="both">{t.weekendBoth}</option>
                                 </select>
                             </div>
@@ -271,15 +279,34 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
                                 </div>
                             </div>
 
-                            {/* Show Jewish Calendar */}
+                            {/* Calendars */}
                             <div className="space-y-3">
-                                <label className="text-slate-300 text-sm font-medium">{t.jewishCalendar}</label>
-                                <button
-                                    onClick={() => updateSettings({ showJewishCalendar: !settings.showJewishCalendar })}
-                                    className={`w-full py-2 rounded-lg text-sm font-medium transition-all border ${settings.showJewishCalendar ? 'bg-sky-900 border-sky-500 text-sky-400 shadow-sm' : 'border-slate-700 text-slate-400 hover:text-white'}`}
-                                >
-                                    {settings.showJewishCalendar ? t.enabled : t.disabled}
-                                </button>
+                                <label className="text-slate-300 text-sm font-medium">Calendars</label>
+                                <div className="space-y-2">
+                                    {[
+                                        { id: 'jewish', label: t.jewishCalendar || 'Jewish Calendar' },
+                                        { id: 'muslim', label: 'Muslim (Hijri) Calendar' }
+                                    ].map(cal => {
+                                        const isActive = settings.activeCalendars.includes(cal.id);
+                                        return (
+                                            <button
+                                                key={cal.id}
+                                                onClick={() => {
+                                                    const newCalendars = isActive
+                                                        ? settings.activeCalendars.filter(c => c !== cal.id)
+                                                        : [...settings.activeCalendars, cal.id];
+                                                    updateSettings({ activeCalendars: newCalendars });
+                                                }}
+                                                className={`w-full flex items-center justify-between px-4 py-3 rounded-xl border transition-all ${isActive ? 'bg-sky-900/40 border-sky-500 text-sky-400' : 'border-slate-700 text-slate-400 hover:bg-slate-800'}`}
+                                            >
+                                                <span>{cal.label}</span>
+                                                <div className={`w-5 h-5 rounded-md border flex items-center justify-center ${isActive ? 'bg-sky-500 border-sky-500' : 'border-slate-600'}`}>
+                                                    {isActive && <div className="w-1.5 h-3 border-r-2 border-b-2 border-white rotate-45 -mt-0.5" />}
+                                                </div>
+                                            </button>
+                                        );
+                                    })}
+                                </div>
                             </div>
                         </div>
                     </section>

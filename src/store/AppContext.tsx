@@ -7,7 +7,7 @@ export type Theme = 'dark' | 'light';
 export type Direction = 'ltr' | 'rtl';
 export type Alignment = 'left' | 'center' | 'right';
 export type Size = 'sm' | 'md' | 'lg' | 'xl';
-export type WeekendMode = 'sat' | 'sun' | 'both' | 'none';
+export type WeekendMode = 'sat' | 'sun' | 'both' | 'none' | 'fri' | 'fri-sat';
 
 export type Recurrence = 'none' | 'weekly' | 'monthly' | 'yearly';
 
@@ -28,7 +28,7 @@ export interface Settings {
     dayNameSize: Size; // sm, md, lg
     dayNameAlign: Alignment;
     timeFormat: '12' | '24';
-    showJewishCalendar: boolean;
+    activeCalendars: string[]; // e.g., 'jewish', 'muslim'
 }
 
 const DEFAULT_SETTINGS: Settings = {
@@ -41,7 +41,7 @@ const DEFAULT_SETTINGS: Settings = {
     dayNameSize: 'sm',
     dayNameAlign: 'center',
     timeFormat: '24',
-    showJewishCalendar: false,
+    activeCalendars: [],
 };
 
 interface AppState {
@@ -113,8 +113,9 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     const updateSettings = (partial: Partial<Settings>) => {
         setSettings(prev => {
             const newSettings = { ...prev, ...partial };
-            if (partial.language === 'he' && partial.showJewishCalendar === undefined) {
-                newSettings.showJewishCalendar = true;
+            // If switching to Hebrew, ensure Jewish calendar is active if it isn't already
+            if (partial.language === 'he' && !newSettings.activeCalendars.includes('jewish')) {
+                newSettings.activeCalendars = [...newSettings.activeCalendars, 'jewish'];
             }
             return newSettings;
         });

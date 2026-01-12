@@ -1,0 +1,6 @@
+Month,Day,Type,Official,name_en,name_ar,name_ru,name_he
+Ramadan,1,holiday,true,Ramadan Start,بداية رمضان,Начало Рамадана,תחילת רמדאן
+Shawwal,1,holiday,true,Eid al-Fitr,عيد الفطر,Ид аль-Фитр,עיד אל-פיטר
+Dhuʻl-Hijjah,10,holiday,true,Eid al-Adha,عيد الأضحى,Ид аль-Адха,עיד אל-אדחא
+Muharram,1,holiday,true,Islamic New Year,رأس السنة الهجرية,Мусульманский Новый год,ראש השנה ההג'רית
+Rabiʻ I,12,minor,false,Mawlid al-Nabi,مولد النبي,Мавлид ан-Наби,מווליד א-נבי

@@ -37,10 +37,11 @@ const DashboardContent: React.FC = () => {
 
   const headerTitle = format(currentDate, viewMode === 'month' ? 'LLLL yyyy' : "'Week of' MMM d, yyyy", { locale: currentLocale });
 
-  // Jewish Date Subtitle
-  // Jewish Date Subtitle Logic
-  let jewishDateSubtitle = '';
-  if (settings.showJewishCalendar) {
+  // --- Secondary Calendar Subtitles ---
+  const activeSubtitles: string[] = [];
+
+  // 1. Jewish Calendar
+  if (settings.activeCalendars.includes('jewish')) {
     // Determine range based on view
     const weekStartParams = { weekStartsOn: settings.weekStart as 0 | 1, locale: currentLocale };
     const startDate = viewMode === 'month' ? startOfMonth(currentDate) : startOfWeek(currentDate, weekStartParams);
@@ -66,19 +67,17 @@ const DashboardContent: React.FC = () => {
       'Adar II': 'Адар II'
     };
 
-    // Helper to get formatted month/year
+    // Helper to get formatted month/year for Jewish
     const getHString = (h: HDate) => {
       if (settings.language === 'he') {
         const parts = h.renderGematriya(true).split(' ');
         return {
           month: parts.slice(1, -1).join(' '),
-          year: parts[parts.length - 1],
+          year: parts.slice(-1)[0],
           full: parts.slice(1).join(' ')
         };
       } else if (settings.language === 'ru') {
         const monthName = h.getMonthName();
-        // Handle "Adar I" / "Adar II" vs "Adar"
-        // Hebcal returns "Adar" in common years.
         const translatedMonth = JEWISH_MONTHS_RU[monthName] || monthName;
         return {
           month: translatedMonth,
@@ -97,16 +96,51 @@ const DashboardContent: React.FC = () => {
     const startObj = getHString(hStart);
     const endObj = getHString(hEnd);
 
+    let jStr = '';
     if (startObj.full === endObj.full) {
-      // Same Month and Year
-      jewishDateSubtitle = startObj.full;
+      jStr = startObj.full;
     } else if (startObj.year === endObj.year) {
-      // Same Year, Different Month
-      jewishDateSubtitle = `${startObj.month} - ${endObj.full}`; // "Shevat - Adar 5786"
+      jStr = `${startObj.month} - ${endObj.full}`;
     } else {
-      // Different Year (e.g. Elul to Tishrei)
-      jewishDateSubtitle = `${startObj.full} - ${endObj.full}`;
+      jStr = `${startObj.full} - ${endObj.full}`;
     }
+    activeSubtitles.push(jStr);
+  }
+
+  // 2. Muslim Calendar
+  if (settings.activeCalendars.includes('muslim')) {
+    // We can use Intl for Hijri (Umm al-Qura)
+    // Note: This relies on browser support for 'islamic-umalqura'
+    const hijriFormatter = new Intl.DateTimeFormat(`${settings.language}-u-ca-islamic-umalqura`, {
+      month: 'long',
+      year: 'numeric'
+    });
+
+    const startDate = viewMode === 'month' ? startOfMonth(currentDate) : startOfWeek(currentDate);
+    const endDate = viewMode === 'month' ? endOfMonth(currentDate) : endOfWeek(currentDate);
+
+    // Get string for start and end
+    // Format usually: "Ramadan 1447 AH"
+    // We just want "Ramadan 1447"
+    const formatHijri = (d: Date) => {
+      const parts = hijriFormatter.formatToParts(d);
+      const month = parts.find(p => p.type === 'month')?.value || '';
+      const year = parts.find(p => p.type === 'year')?.value || '';
+      return { month, year, full: `${month} ${year}` };
+    };
+
+    const hStart = formatHijri(startDate);
+    const hEnd = formatHijri(endDate);
+
+    let mStr = '';
+    if (hStart.full === hEnd.full) {
+      mStr = hStart.full;
+    } else if (hStart.year === hEnd.year) {
+      mStr = `${hStart.month} - ${hEnd.full}`;
+    } else {
+      mStr = `${hStart.full} - ${hEnd.full}`;
+    }
+    activeSubtitles.push(mStr);
   }
 
   const CalendarSection = (
@@ -122,13 +156,6 @@ const DashboardContent: React.FC = () => {
         {/* CENTER: Navigation & Title (Absolute Centered) */}
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
           <div className="pointer-events-auto flex items-center gap-4">
-            {/* BUTTONS SWAPPED: Next (Right Arrow) on Left, Prev (Left Arrow) on Right? 
-                User said "swap the sides of < > arrows". 
-                Usually [ < ] [ Title ] [ > ].
-                If user wants swap: [ > ] [ Title ] [ < ] ?? Or maybe standard RTL flip? 
-                Let's assume explicit swap: 
-                [ChevronRight -> Next] [Title] [ChevronLeft -> Prev] 
-            */}
 
             <button
               onClick={() => navigate('prev')}
@@ -145,9 +172,14 @@ const DashboardContent: React.FC = () => {
               <h2 className="text-6xl font-bold text-text-main capitalize tracking-tight min-w-[300px] leading-none">
                 {headerTitle}
               </h2>
-              {settings.showJewishCalendar && (
-                <span className="text-3xl font-light text-primary mt-1 opacity-80">
-                  {jewishDateSubtitle}
+              {activeSubtitles.length > 0 && (
+                <span className="text-3xl font-light text-primary mt-1 opacity-80 flex gap-3">
+                  {activeSubtitles.map((sub, i) => (
+                    <React.Fragment key={i}>
+                      <span>{sub}</span>
+                      {i < activeSubtitles.length - 1 && <span className="opacity-50">|</span>}
+                    </React.Fragment>
+                  ))}
                 </span>
               )}
             </div>
