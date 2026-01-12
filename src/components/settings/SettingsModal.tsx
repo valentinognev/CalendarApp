@@ -2,110 +2,7 @@ import React from 'react';
 import { useAppStore, type Language, type WeekendMode, type Size, type Alignment } from '../../store/AppContext';
 import { X, Moon, Sun, Globe, Layout, Palette } from 'lucide-react';
 
-const TRANSLATIONS: Record<string, Record<string, string>> = {
-    en: {
-        title: 'Settings',
-        themeTitle: 'Theme & Appearance',
-        colorTheme: 'Color Theme',
-        dark: 'Dark',
-        light: 'Light',
-        highlightWeekends: 'Highlight Weekends',
-        weekendNone: 'None',
-        weekendSat: 'Saturday',
-        weekendSun: 'Sunday',
-        weekendFri: 'Friday',
-        weekendFriSat: 'Friday & Saturday',
-        weekendBoth: 'Both (Sat & Sun)',
-        regionalTitle: 'Regional',
-        language: 'Language',
-        startWeek: 'Start Week On',
-        sunday: 'Sunday',
-        monday: 'Monday',
-        jewishCalendar: 'Jewish Calendar',
-        enabled: 'Enabled',
-        disabled: 'Disabled',
-        layoutTitle: 'Layout Details',
-        dayNumSize: 'Day Number Size',
-        dayNumAlign: 'Day Number Align',
-        dayNameSize: 'Day Name Size',
-        dayNameAlign: 'Day Name Align',
-        left: 'Left',
-        center: 'Center',
-        right: 'Right',
-        sm: 'S',
-        md: 'M',
-        lg: 'L',
-        xl: 'XL'
-    },
-    ru: {
-        title: 'Настройки',
-        themeTitle: 'Тема и Оформление',
-        colorTheme: 'Цветовая тема',
-        dark: 'Тёмная',
-        light: 'Светлая',
-        highlightWeekends: 'Подсветка выходных',
-        weekendNone: 'Нет',
-        weekendSat: 'Суббота',
-        weekendSun: 'Воскресенье',
-        weekendFri: 'Пятница',
-        weekendFriSat: 'Пт & Сб',
-        weekendBoth: 'Оба (Сб & Вс)',
-        regionalTitle: 'Региональные',
-        language: 'Язык',
-        startWeek: 'Начало недели',
-        sunday: 'Воскресенье',
-        monday: 'Понедельник',
-        jewishCalendar: 'Еврейский календарь',
-        enabled: 'Включен',
-        disabled: 'Выключен',
-        layoutTitle: 'Детали макета',
-        dayNumSize: 'Размер номера дня',
-        dayNumAlign: 'Выравнивание номера',
-        dayNameSize: 'Размер названия дня',
-        dayNameAlign: 'Выравнивание названия',
-        left: 'Слева',
-        center: 'Центр',
-        right: 'Справа',
-        sm: 'S',
-        md: 'M',
-        lg: 'L',
-        xl: 'XL'
-    },
-    he: {
-        title: 'הגדרות',
-        themeTitle: 'ערכת נושא ומראה',
-        colorTheme: 'ערכת צבעים',
-        dark: 'כהה',
-        light: 'בהירה',
-        highlightWeekends: 'הדגשת סוף שבוע',
-        weekendNone: 'ללא',
-        weekendSat: 'שבת',
-        weekendSun: 'ראשון',
-        weekendFri: 'שישי',
-        weekendFriSat: 'שישי ושבת',
-        weekendBoth: 'שניהם (שבת וראשון)',
-        regionalTitle: 'אזוריות',
-        language: 'שפה',
-        startWeek: 'תחילת שבוע',
-        sunday: 'ראשון',
-        monday: 'שני',
-        jewishCalendar: 'לוח שנה עברי',
-        enabled: 'מופעל',
-        disabled: 'כבוי',
-        layoutTitle: 'פרטי תצוגה',
-        dayNumSize: 'גודל מספר יום',
-        dayNumAlign: 'יישור מספר יום',
-        dayNameSize: 'גודל שם יום',
-        dayNameAlign: 'יישור שם יום',
-        left: 'שמאל',
-        center: 'מרכז',
-        right: 'ימין',
-        sm: 'S',
-        md: 'M',
-        lg: 'L',
-        xl: 'XL'
-    }
-};
+import { TRANSLATIONS } from '../../utils/translations';
 
 interface SettingsModalProps {
     isOpen: boolean;
@@ -113,62 +10,66 @@ interface SettingsModalProps {
 }
 
 const LANGUAGE_OPTIONS = [
-    { code: 'en', name: 'English' },
-    { code: 'zh', name: 'Chinese (中文)' },
-    { code: 'hi', name: 'Hindi (हिन्दी)' },
-    { code: 'es', name: 'Spanish (Español)' },
-    { code: 'fr', name: 'French (Français)' },
+    { code: 'am', name: 'Amharic (አማርኛ)' },
     { code: 'ar', name: 'Arabic (العربية)' },
     { code: 'bn', name: 'Bengali (বাংলা)' },
-    { code: 'pt', name: 'Portuguese (Português)' },
-    { code: 'ru', name: 'Russian (Русский)' },
-    { code: 'ur', name: 'Urdu (اردو)' },
-    { code: 'id', name: 'Indonesian (Bahasa Indonesia)' },
-    { code: 'de', name: 'German (Deutsch)' },
-    { code: 'ja', name: 'Japanese (日本語)' },
-    { code: 'sw', name: 'Swahili (Kiswahili)' },
-    { code: 'mr', name: 'Marathi (मराठी)' },
-    { code: 'te', name: 'Telugu (తెలుగు)' },
-    { code: 'tr', name: 'Turkish (Türkçe)' },
-    { code: 'ta', name: 'Tamil (தமிழ்)' },
-    { code: 'pa', name: 'Punjabi (ਪੰਜਾਬੀ)' },
-    { code: 'ko', name: 'Korean (한국어)' },
-    { code: 'vi', name: 'Vietnamese (Tiếng Việt)' },
-    { code: 'it', name: 'Italian (Italiano)' },
-    { code: 'th', name: 'Thai (ไทย)' },
-    { code: 'fa', name: 'Persian (فارسی)' },
-    { code: 'pl', name: 'Polish (Polski)' },
-    { code: 'uk', name: 'Ukrainian (Українська)' },
-    { code: 'ro', name: 'Romanian (Română)' },
-    { code: 'nl', name: 'Dutch (Nederlands)' },
-    { code: 'el', name: 'Greek (Ελληνικά)' },
-    { code: 'hu', name: 'Hungarian (Magyar)' },
-    { code: 'sv', name: 'Swedish (Svenska)' },
+    { code: 'bg', name: 'Bulgarian (Български)' },
+    { code: 'ca', name: 'Catalan (Català)' },
+    { code: 'zh', name: 'Chinese (中文)' },
+    { code: 'hr', name: 'Croatian (Hrvatski)' },
     { code: 'cs', name: 'Czech (Čeština)' },
     { code: 'da', name: 'Danish (Dansk)' },
-    { code: 'fi', name: 'Finnish (Suomi)' },
-    { code: 'he', name: 'Hebrew (עברית)' },
-    { code: 'no', name: 'Norwegian (Norsk)' },
-    { code: 'sk', name: 'Slovak (Slovenčina)' },
-    { code: 'hr', name: 'Croatian (Hrvatski)' },
-    { code: 'bg', name: 'Bulgarian (Български)' },
-    { code: 'sl', name: 'Slovenian (Slovenščina)' },
-    { code: 'lt', name: 'Lithuanian (Lietuvių)' },
-    { code: 'lv', name: 'Latvian (Latviešu)' },
+    { code: 'nl', name: 'Dutch (Nederlands)' },
+    { code: 'en', name: 'English' },
     { code: 'et', name: 'Estonian (Eesti)' },
-    { code: 'sr', name: 'Serbian (Српски)' },
-    { code: 'ca', name: 'Catalan (Català)' },
-    { code: 'ms', name: 'Malay (Bahasa Melayu)' },
     { code: 'fil', name: 'Filipino (Filipino)' },
-    { code: 'am', name: 'Amharic (አማርኛ)' },
+    { code: 'fi', name: 'Finnish (Suomi)' },
+    { code: 'fr', name: 'French (Français)' },
+    { code: 'de', name: 'German (Deutsch)' },
+    { code: 'el', name: 'Greek (Ελληνικά)' },
     { code: 'gu', name: 'Gujarati (ગુજરાતી)' },
-    { code: 'kn', name: 'Kannada (ಕನ್ನಡ)' }
+    { code: 'he', name: 'Hebrew (עברית)' },
+    { code: 'hi', name: 'Hindi (हिन्दी)' },
+    { code: 'hu', name: 'Hungarian (Magyar)' },
+    { code: 'id', name: 'Indonesian (Bahasa Indonesia)' },
+    { code: 'it', name: 'Italian (Italiano)' },
+    { code: 'ja', name: 'Japanese (日本語)' },
+    { code: 'kn', name: 'Kannada (ಕನ್ನಡ)' },
+    { code: 'ko', name: 'Korean (한국어)' },
+    { code: 'lv', name: 'Latvian (Latviešu)' },
+    { code: 'lt', name: 'Lithuanian (Lietuvių)' },
+    { code: 'ms', name: 'Malay (Bahasa Melayu)' },
+    { code: 'mr', name: 'Marathi (मराठी)' },
+    { code: 'no', name: 'Norwegian (Norsk)' },
+    { code: 'fa', name: 'Persian (فارسی)' },
+    { code: 'pl', name: 'Polish (Polski)' },
+    { code: 'pt', name: 'Portuguese (Português)' },
+    { code: 'pa', name: 'Punjabi (ਪੰਜਾਬੀ)' },
+    { code: 'ro', name: 'Romanian (Română)' },
+    { code: 'ru', name: 'Russian (Русский)' },
+    { code: 'sr', name: 'Serbian (Српски)' },
+    { code: 'sk', name: 'Slovak (Slovenčina)' },
+    { code: 'sl', name: 'Slovenian (Slovenščina)' },
+    { code: 'es', name: 'Spanish (Español)' },
+    { code: 'sw', name: 'Swahili (Kiswahili)' },
+    { code: 'sv', name: 'Swedish (Svenska)' },
+    { code: 'ta', name: 'Tamil (தமிழ்)' },
+    { code: 'te', name: 'Telugu (తెలుగు)' },
+    { code: 'th', name: 'Thai (ไทย)' },
+    { code: 'tr', name: 'Turkish (Türkçe)' },
+    { code: 'uk', name: 'Ukrainian (Українська)' },
+    { code: 'ur', name: 'Urdu (اردو)' },
+    { code: 'vi', name: 'Vietnamese (Tiếng Việt)' }
 ];
 
 export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose }) => {
     const { settings, updateSettings } = useAppStore();
     // Fallback to English for UI if translation not available
-    const t = TRANSLATIONS[settings.language] || TRANSLATIONS['en'];
+    const t = new Proxy(TRANSLATIONS[settings.language] || {}, {
+        get: (target, prop: string) => {
+            return target[prop] || TRANSLATIONS['en'][prop] || prop;
+        }
+    }) as Record<string, string>;
 
     if (!isOpen) return null;
 
@@ -284,8 +185,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
                                 <label className="text-slate-300 text-sm font-medium">Calendars</label>
                                 <div className="space-y-2">
                                     {[
-                                        { id: 'jewish', label: t.jewishCalendar || 'Jewish Calendar' },
-                                        { id: 'muslim', label: 'Muslim (Hijri) Calendar' }
+                                        { id: 'jewish', label: t.jewishCalendar },
+                                        { id: 'muslim', label: t.muslimCalendar }
                                     ].map(cal => {
                                         const isActive = settings.activeCalendars.includes(cal.id);
                                         return (

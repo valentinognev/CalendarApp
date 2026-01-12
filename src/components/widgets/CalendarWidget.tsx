@@ -1,24 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useAppStore } from '../../store/AppContext';
 import { startOfMonth, endOfMonth, startOfWeek, endOfWeek, eachDayOfInterval, format, isSameMonth, isToday, isWeekend, addMinutes, subMinutes, parse } from 'date-fns';
-import {
-    enUS, ru, he, zhCN, hi, es, fr, ar, bn, pt, id, de, ja, te, tr, ta, ko, vi, it, th, faIR, pl, uk, ro, nl, el, hu, sv, cs, da, fi, nb, sk, hr, bg, sl, lt, lv, et, sr, ca, ms, gu, kn
-} from 'date-fns/locale';
+import { getLocale } from '../../utils/dateLocales';
 import { HDate } from '@hebcal/core';
 import { EventModal } from '../events/EventModal';
 import { fetchJewishHolidays, type JewishHoliday } from '../../services/JewishHolidayService';
 import { fetchMuslimHolidays, getHijriDate, type MuslimHoliday } from '../../services/MuslimHolidayService';
 import { fetchSunsetTimes, getSunsetTime } from '../../services/SunsetService';
-
-const LOCALE_MAP: Record<string, any> = {
-    en: enUS, zh: zhCN, hi: hi, es: es, fr: fr, ar: ar, bn: bn, pt: pt, ru: ru,
-    id: id, de: de, ja: ja, te: te, tr: tr, ta: ta, ko: ko,
-    vi: vi, it: it, th: th, fa: faIR, pl: pl, uk: uk, ro: ro, nl: nl, el: el, hu: hu,
-    sv: sv, cs: cs, da: da, fi: fi, he: he, no: nb, sk: sk, hr: hr, bg: bg, sl: sl,
-    lt: lt, lv: lv, et: et, sr: sr, ca: ca, ms: ms, gu: gu, kn: kn,
-    // Fallbacks
-    ur: enUS, sw: enUS, mr: enUS, pa: enUS, fil: enUS, am: enUS
-};
 
 const SIZE_MAP: Record<string, string> = {
     sm: 'text-sm',
@@ -47,7 +35,7 @@ const TEXT_ALIGN_MAP: Record<string, string> = {
 };
 
 export const CalendarWidget: React.FC = () => {
-    const { settings, currentDate, getEventsForDate, location } = useAppStore();
+    const { settings, currentDate, getEventsForDate, location, direction } = useAppStore();
     const [selectedDate, setSelectedDate] = useState<Date | null>(null);
     const [jewishHolidays, setJewishHolidays] = useState<JewishHoliday[]>([]);
     const [muslimHolidays, setMuslimHolidays] = useState<MuslimHoliday[]>([]);
@@ -67,7 +55,7 @@ export const CalendarWidget: React.FC = () => {
         loadData();
     }, []);
 
-    const currentLocale = LOCALE_MAP[settings.language] || enUS;
+    const currentLocale = getLocale(settings.language);
     const weekStartParams = { weekStartsOn: settings.weekStart as 0 | 1, locale: currentLocale };
 
     const renderMonthView = () => {
@@ -156,7 +144,7 @@ export const CalendarWidget: React.FC = () => {
                                 dayStr: jDayStr,
                                 holiday: jName,
                                 style: jStyle,
-                                corner: settings.language === 'he' ? topLeft : topRight // Jewish usually opposite to Gregorian
+                                corner: direction === 'rtl' ? topLeft : topRight
                             });
 
                             // Shabbat Times
@@ -194,7 +182,7 @@ export const CalendarWidget: React.FC = () => {
                                 dayStr: `${hDate.day}`, // Just number for cleaner UI?
                                 holiday: mName,
                                 style: mStyle,
-                                corner: settings.language === 'he' ? topLeft : topRight // Same as Jewish to avoid Gregorian overlap
+                                corner: direction === 'rtl' ? topLeft : topRight
                             });
                         }
 
@@ -257,8 +245,8 @@ export const CalendarWidget: React.FC = () => {
                             </div>
                         );
                     })}
-                </div>
-            </div>
+                </div >
+            </div >
         );
     };
 

@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 
-const outputPath = path.resolve('public/SpecialDays/JewishSpecialDays.csv');
+const outputPath = path.resolve('public/UtilityFiles/JewishSpecialDays.csv');
 
 // 50 Common Languages (ISO 639-1)
 const LANGUAGES = [

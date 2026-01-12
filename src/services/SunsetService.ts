@@ -17,7 +17,7 @@ export const fetchSunsetTimes = async (): Promise<SunsetMap> => {
 
     isFetching = true;
     try {
-        const response = await fetch('/SpecialDays/SunsetTimes.csv?t=' + Date.now());
+        const response = await fetch('/UtilityFiles/SunsetTimes.csv?t=' + Date.now());
         const text = await response.text();
         sunsetCache = parseSunsetCSV(text);
         return sunsetCache;

@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
 import { addMonths, subMonths, addWeeks, subWeeks, isSameDay, startOfDay } from 'date-fns';
+import { getLanguageDirection } from '../services/LanguageService';
 
 type ViewMode = 'month' | 'week';
 export type Language = string; // Support dynamic languages
@@ -59,6 +60,7 @@ interface AppState {
     deleteEvent: (id: string) => void;
     getEventsForDate: (date: Date) => CalendarEvent[];
     location: { lat: number; long: number } | null;
+    direction: Direction;
 }
 
 const AppContext = createContext<AppState | undefined>(undefined);
@@ -67,6 +69,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     const [viewMode, setViewMode] = useState<ViewMode>('month');
     const [isSplit, setIsSplit] = useState(false);
     const [currentDate, setCurrentDate] = useState(new Date());
+    const [direction, setDirection] = useState<Direction>('ltr');
 
     const [settings, setSettings] = useState<Settings>(() => {
         try {
@@ -97,8 +100,13 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
             document.documentElement.classList.add('light');
         }
 
-        const dir = settings.language === 'he' ? 'rtl' : 'ltr';
-        document.documentElement.setAttribute('dir', dir);
+        const updateDir = async () => {
+            const dir = await getLanguageDirection(settings.language);
+            setDirection(dir);
+            document.documentElement.setAttribute('dir', dir);
+        };
+        updateDir();
+
         document.documentElement.setAttribute('lang', settings.language);
 
     }, [settings]);
@@ -184,7 +192,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
     return (
         <AppContext.Provider value={{
-            viewMode, isSplit, settings, currentDate, events, location,
+            viewMode, isSplit, settings, currentDate, events, location, direction,
             toggleView, toggleSplit, updateSettings, navigate, jumpToToday,
             addEvent, deleteEvent, getEventsForDate
         }}>

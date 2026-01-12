@@ -1,18 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useAppStore } from '../../store/AppContext';
 import { format } from 'date-fns';
-import { enUS, ru, he } from 'date-fns/locale';
-
-const LOCALE_MAP: Record<string, any> = {
-    en: enUS,
-    ru: ru,
-    he: he
-};
+import { getLocale } from '../../utils/dateLocales';
 
 export const ClockWidget: React.FC = () => {
     const [time, setTime] = useState(new Date());
     const { settings } = useAppStore();
-    const currentLocale = LOCALE_MAP[settings.language];
+    const currentLocale = getLocale(settings.language);
 
     useEffect(() => {
         const timer = setInterval(() => setTime(new Date()), 1000);

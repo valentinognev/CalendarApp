@@ -3,7 +3,7 @@ import fs from 'fs';
 import path from 'path';
 
 // Output path
-const outputPath = path.resolve('public/SpecialDays/SunsetTimes.csv');
+const outputPath = path.resolve('public/UtilityFiles/SunsetTimes.csv');
 
 // Year 2024 (Leap year to cover 366 days)
 const YEAR = 2024;
