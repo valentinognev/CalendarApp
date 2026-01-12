@@ -30,6 +30,7 @@ export interface Settings {
     dayNameAlign: Alignment;
     timeFormat: '12' | '24';
     activeCalendars: string[]; // e.g., 'jewish', 'muslim'
+    country: string; // For National Holidays
 }
 
 const DEFAULT_SETTINGS: Settings = {
@@ -43,6 +44,7 @@ const DEFAULT_SETTINGS: Settings = {
     dayNameAlign: 'center',
     timeFormat: '24',
     activeCalendars: [],
+    country: 'United States', // Default
 };
 
 interface AppState {

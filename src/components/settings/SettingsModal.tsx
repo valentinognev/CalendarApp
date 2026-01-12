@@ -3,6 +3,8 @@ import { useAppStore, type Language, type WeekendMode, type Size, type Alignment
 import { X, Moon, Sun, Globe, Layout, Palette } from 'lucide-react';
 
 import { TRANSLATIONS } from '../../utils/translations';
+import { fetchCountryList, type CountryInfo } from '../../services/NationalHolidayService';
+import { useState, useEffect } from 'react';
 
 interface SettingsModalProps {
     isOpen: boolean;
@@ -64,6 +66,15 @@ const LANGUAGE_OPTIONS = [
 
 export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose }) => {
     const { settings, updateSettings } = useAppStore();
+    const [countries, setCountries] = useState<CountryInfo[]>([]);
+
+    useEffect(() => {
+        const loadCountries = async () => {
+            const list = await fetchCountryList();
+            setCountries(list);
+        };
+        loadCountries();
+    }, []);
     // Fallback to English for UI if translation not available
     const t = new Proxy(TRANSLATIONS[settings.language] || {}, {
         get: (target, prop: string) => {
@@ -157,6 +168,23 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
                                 >
                                     {LANGUAGE_OPTIONS.map(lang => (
                                         <option key={lang.code} value={lang.code}>{lang.name}</option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            {/* National Holidays Country */}
+                            <div className="space-y-3">
+                                <label className="text-slate-300 text-sm font-medium">National Holidays / Pays</label>
+                                <select
+                                    className="w-full bg-slate-800 border border-slate-700 text-white rounded-xl px-4 py-3 outline-none focus:border-sky-500 appearance-none"
+                                    value={settings.country || ''}
+                                    onChange={(e) => updateSettings({ country: e.target.value })}
+                                >
+                                    <option value="" disabled>Select Country...</option>
+                                    {countries.map((c) => (
+                                        <option key={c.country} value={c.country}>
+                                            {c.country}
+                                        </option>
                                     ))}
                                 </select>
                             </div>

@@ -6,6 +6,7 @@ import { HDate } from '@hebcal/core';
 import { EventModal } from '../events/EventModal';
 import { fetchJewishHolidays, type JewishHoliday } from '../../services/JewishHolidayService';
 import { fetchMuslimHolidays, getHijriDate, type MuslimHoliday } from '../../services/MuslimHolidayService';
+import { fetchCountryList, fetchNationalHolidays, type NationalHoliday } from '../../services/NationalHolidayService';
 import { fetchSunsetTimes, getSunsetTime } from '../../services/SunsetService';
 
 const SIZE_MAP: Record<string, string> = {
@@ -39,6 +40,8 @@ export const CalendarWidget: React.FC = () => {
     const [selectedDate, setSelectedDate] = useState<Date | null>(null);
     const [jewishHolidays, setJewishHolidays] = useState<JewishHoliday[]>([]);
     const [muslimHolidays, setMuslimHolidays] = useState<MuslimHoliday[]>([]);
+    const [nationalHolidays, setNationalHolidays] = useState<NationalHoliday[]>([]);
+    const [countryCalendarType, setCountryCalendarType] = useState<'gregorian' | 'jewish' | 'muslim'>('gregorian');
     const [sunsetMap, setSunsetMap] = useState<Map<number, Record<string, string>>>(new Map());
 
     useEffect(() => {
@@ -54,6 +57,21 @@ export const CalendarWidget: React.FC = () => {
         };
         loadData();
     }, []);
+
+    // Load National Holidays when country changes
+    useEffect(() => {
+        const loadNationalHolidays = async () => {
+            if (!settings.country) return;
+            const countries = await fetchCountryList();
+            const countryInfo = countries.find(c => c.country === settings.country);
+            if (countryInfo) {
+                const holidays = await fetchNationalHolidays(countryInfo.filename);
+                setNationalHolidays(holidays);
+                setCountryCalendarType(countryInfo.calendarType);
+            }
+        };
+        loadNationalHolidays();
+    }, [settings.country]);
 
     const currentLocale = getLocale(settings.language);
     const weekStartParams = { weekStartsOn: settings.weekStart as 0 | 1, locale: currentLocale };
@@ -109,7 +127,7 @@ export const CalendarWidget: React.FC = () => {
 
                         // --- Calendar Data Processing ---
                         const activeCals = settings.activeCalendars;
-                        const calendarData: { type: 'jewish' | 'muslim', dayStr: string, holiday?: string, style: string, corner: string }[] = [];
+                        const calendarData: { type: 'jewish' | 'muslim' | 'national', dayStr: string, holiday?: string, style: string, corner: string }[] = [];
 
                         // 1. Jewish Calendar
                         let shabbatTime = '';
@@ -184,6 +202,38 @@ export const CalendarWidget: React.FC = () => {
                                 style: mStyle,
                                 corner: direction === 'rtl' ? topLeft : topRight
                             });
+                        }
+
+                        // 3. National Holidays
+                        const nMatch = nationalHolidays.find(h => {
+                            const effectiveCal = h.calendarType || countryCalendarType;
+
+                            if (effectiveCal === 'jewish') {
+                                // Match Hebrew Date
+                                const hdate = new HDate(day);
+                                const jDateStr = `${hdate.getDate()} ${hdate.getMonthName()}`;
+                                return h.date === jDateStr;
+                            } else if (effectiveCal === 'muslim') {
+                                // Match Muslim Date
+                                const hDate = getHijriDate(day);
+                                // Check if we already have it in local var? No, block scoped.
+                                // Just re-calc or lift up. Re-calc is cheap enough.
+                                return h.date === `${hDate.day} ${hDate.month}`;
+                            } else {
+                                // Gregorian
+                                return h.date === format(day, 'yyyy-MM-dd');
+                            }
+                        });
+
+                        if (nMatch) {
+                            // National holidays are usually official
+                            isOfficial = true;
+                            calendarData.push({
+                                dayStr: '',
+                                holiday: nMatch.names[settings.language] || nMatch.names['en'] || nMatch.name,
+                                style: 'text-purple-500 font-bold',
+                                corner: ''
+                            } as any);
                         }
 
                         // Combine Holidays for bottom display

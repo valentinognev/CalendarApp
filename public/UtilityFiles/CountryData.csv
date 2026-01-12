@@ -1,0 +1,68 @@
+Country,LanguageCode,HolidayFile,CalendarType
+United States,en-USA,USA.csv,gregorian
+United Kingdom,en-USA,UK.csv,gregorian
+Israel,he-ISR,Israel.csv,jewish
+France,fr-FRA,France.csv,gregorian
+Germany,de-DEU,Germany.csv,gregorian
+Spain,es-ESP,Spain.csv,gregorian
+Russia,ru-RUS,Russia.csv,gregorian
+China,zh-CHN,China.csv,gregorian
+India,hi-IND,India.csv,gregorian
+Japan,ja-JPN,Japan.csv,gregorian
+Italy,it-ITA,Italy.csv,gregorian
+Brazil,pt-PRT,Brazil.csv,gregorian
+Netherlands,nl-NLD,Netherlands.csv,gregorian
+Sweden,sv-SWE,Sweden.csv,gregorian
+Turkey,tr-TUR,Turkey.csv,gregorian
+Poland,pl-POL,Poland.csv,gregorian
+South Korea,ko-KOR,SouthKorea.csv,gregorian
+Vietnam,vi-VNM,Vietnam.csv,gregorian
+Thailand,th-THA,Thailand.csv,gregorian
+Indonesia,id-IDN,Indonesia.csv,gregorian
+Ukraine,uk-UKR,Ukraine.csv,gregorian
+Romania,ro-ROU,Romania.csv,gregorian
+Greece,el-GRC,Greece.csv,gregorian
+Hungary,hu-HUN,Hungary.csv,gregorian
+Czech Republic,cs-CZE,CzechRepublic.csv,gregorian
+Denmark,da-DNK,Denmark.csv,gregorian
+Finland,fi-FIN,Finland.csv,gregorian
+Norway,no-NOR,Norway.csv,gregorian
+Slovakia,sk-SVK,Slovakia.csv,gregorian
+Croatia,hr-HRV,Croatia.csv,gregorian
+Bulgaria,bg-BGR,Bulgaria.csv,gregorian
+Slovenia,sl-SVN,Slovenia.csv,gregorian
+Serbia,sr-SRB,Serbia.csv,gregorian
+Lithuania,lt-LTU,Lithuania.csv,gregorian
+Latvia,lv-LVA,Latvia.csv,gregorian
+Estonia,et-EST,Estonia.csv,gregorian
+Catalonia,ca-ESP,Catalonia.csv,gregorian
+Philippines,fil-PHL,Philippines.csv,gregorian
+Malaysia,ms-MYS,Malaysia.csv,gregorian
+Ethiopia,am-ETH,Ethiopia.csv,gregorian
+Pakistan,ur-PAK,Pakistan.csv,muslim
+Bangladesh,bn-BGD,Bangladesh.csv,muslim
+Iran,fa-IRN,Iran.csv,muslim
+Tanzania,sw-TZA,Tanzania.csv,gregorian
+Saudi Arabia,ar-SAU,SaudiArabia.csv,muslim
+Portugal,pt-PRT,Portugal.csv,gregorian
+Mexico,es-ESP,Mexico.csv,gregorian
+Canada,en-USA,Canada.csv,gregorian
+Australia,en-USA,Australia.csv,gregorian
+Argentina,es-ESP,Argentina.csv,gregorian
+Belgium,fr-FRA,Belgium.csv,gregorian
+Switzerland,de-DEU,Switzerland.csv,gregorian
+Austria,de-DEU,Austria.csv,gregorian
+South Africa,en-USA,SouthAfrica.csv,gregorian
+Nigeria,en-USA,Nigeria.csv,gregorian
+Egypt,ar-SAU,Egypt.csv,muslim
+Kenya,sw-TZA,Kenya.csv,gregorian
+Morocco,ar-SAU,Morocco.csv,muslim
+Peru,es-ESP,Peru.csv,gregorian
+Colombia,es-ESP,Colombia.csv,gregorian
+Venezuela,es-ESP,Venezuela.csv,gregorian
+Chile,es-ESP,Chile.csv,gregorian
+Ireland,en-USA,Ireland.csv,gregorian
+New Zealand,en-USA,NewZealand.csv,gregorian
+Singapore,en-USA,Singapore.csv,gregorian
+Hong Kong,zh-CHN,HongKong.csv,gregorian
+Taiwan,zh-CHN,Taiwan.csv,gregorian
