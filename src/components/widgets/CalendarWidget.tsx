@@ -99,9 +99,7 @@ export const CalendarWidget: React.FC = () => {
 
                         if (settings.showJewishCalendar) {
                             const hdate = new HDate(day);
-                            jewishDayStr = settings.language === 'he'
-                                ? hdate.renderGematriya().split(' ')[0].replace(/'/g, '') // Just the day letter(s)
-                                : hdate.getDate().toString();
+                            jewishDayStr = hdate.renderGematriya().split(' ')[0].replace(/'/g, ''); // Just the day letter(s)
                             isRoshChodesh = hdate.getDate() === 1;
 
                             // Holiday Logic

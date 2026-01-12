@@ -98,22 +98,11 @@ const DashboardContent: React.FC = () => {
                 [ChevronRight -> Next] [Title] [ChevronLeft -> Prev] 
             */}
 
-            {/* Reset / Jump to Today Button (Visible only if not current month) */}
-            {!isSameMonth(currentDate, new Date()) && (
-              <button
-                onClick={jumpToToday}
-                className="p-2 rounded-full bg-primary/10 text-primary hover:bg-primary/20 transition-all animate-in fade-in zoom-in"
-                title="Back to Today"
-              >
-                <RotateCcw size={24} />
-              </button>
-            )}
-
             <button
-              onClick={() => navigate('next')}
+              onClick={() => navigate('prev')}
               className="p-2 rounded-full hover:bg-surface-hover text-text-muted hover:text-text-main transition-colors"
             >
-              <ChevronRight size={28} />
+              <ChevronLeft size={28} />
             </button>
 
             <div
@@ -132,11 +121,22 @@ const DashboardContent: React.FC = () => {
             </div>
 
             <button
-              onClick={() => navigate('prev')}
+              onClick={() => navigate('next')}
               className="p-2 rounded-full hover:bg-surface-hover text-text-muted hover:text-text-main transition-colors"
             >
-              <ChevronLeft size={28} />
+              <ChevronRight size={28} />
             </button>
+
+            {/* Reset / Jump to Today Button (Visible only if not current month) */}
+            {!isSameMonth(currentDate, new Date()) && (
+              <button
+                onClick={jumpToToday}
+                className="p-2 rounded-full bg-primary/10 text-primary hover:bg-primary/20 transition-all animate-in fade-in zoom-in"
+                title="Back to Today"
+              >
+                <RotateCcw size={24} />
+              </button>
+            )}
           </div>
         </div>
 

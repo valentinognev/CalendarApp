@@ -116,6 +116,17 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
                                     </button>
                                 </div>
                             </div>
+
+                            {/* Show Jewish Calendar */}
+                            <div className="space-y-3">
+                                <label className="text-slate-300 text-sm font-medium">Jewish Calendar</label>
+                                <button
+                                    onClick={() => updateSettings({ showJewishCalendar: !settings.showJewishCalendar })}
+                                    className={`w-full py-2 rounded-lg text-sm font-medium transition-all border ${settings.showJewishCalendar ? 'bg-sky-900 border-sky-500 text-sky-400 shadow-sm' : 'border-slate-700 text-slate-400 hover:text-white'}`}
+                                >
+                                    {settings.showJewishCalendar ? 'Enabled' : 'Disabled'}
+                                </button>
+                            </div>
                         </div>
                     </section>
 
