@@ -2,6 +2,105 @@ import React from 'react';
 import { useAppStore, type Language, type WeekendMode, type Size, type Alignment } from '../../store/AppContext';
 import { X, Moon, Sun, Globe, Layout, Palette } from 'lucide-react';
 
+const TRANSLATIONS = {
+    en: {
+        title: 'Settings',
+        themeTitle: 'Theme & Appearance',
+        colorTheme: 'Color Theme',
+        dark: 'Dark',
+        light: 'Light',
+        highlightWeekends: 'Highlight Weekends',
+        weekendNone: 'None',
+        weekendSat: 'Saturday',
+        weekendSun: 'Sunday',
+        weekendBoth: 'Both (Sat & Sun)',
+        regionalTitle: 'Regional',
+        language: 'Language',
+        startWeek: 'Start Week On',
+        sunday: 'Sunday',
+        monday: 'Monday',
+        jewishCalendar: 'Jewish Calendar',
+        enabled: 'Enabled',
+        disabled: 'Disabled',
+        layoutTitle: 'Layout Details',
+        dayNumSize: 'Day Number Size',
+        dayNumAlign: 'Day Number Align',
+        dayNameSize: 'Day Name Size',
+        dayNameAlign: 'Day Name Align',
+        left: 'Left',
+        center: 'Center',
+        right: 'Right',
+        sm: 'S',
+        md: 'M',
+        lg: 'L',
+        xl: 'XL'
+    },
+    ru: {
+        title: 'Настройки',
+        themeTitle: 'Тема и Оформление',
+        colorTheme: 'Цветовая тема',
+        dark: 'Тёмная',
+        light: 'Светлая',
+        highlightWeekends: 'Подсветка выходных',
+        weekendNone: 'Нет',
+        weekendSat: 'Суббота',
+        weekendSun: 'Воскресенье',
+        weekendBoth: 'Оба (Сб & Вс)',
+        regionalTitle: 'Региональные',
+        language: 'Язык',
+        startWeek: 'Начало недели',
+        sunday: 'Воскресенье',
+        monday: 'Понедельник',
+        jewishCalendar: 'Еврейский календарь',
+        enabled: 'Включен',
+        disabled: 'Выключен',
+        layoutTitle: 'Детали макета',
+        dayNumSize: 'Размер номера дня',
+        dayNumAlign: 'Выравнивание номера',
+        dayNameSize: 'Размер названия дня',
+        dayNameAlign: 'Выравнивание названия',
+        left: 'Слева',
+        center: 'Центр',
+        right: 'Справа',
+        sm: 'S',
+        md: 'M',
+        lg: 'L',
+        xl: 'XL'
+    },
+    he: {
+        title: 'הגדרות',
+        themeTitle: 'ערכת נושא ומראה',
+        colorTheme: 'ערכת צבעים',
+        dark: 'כהה',
+        light: 'בהירה',
+        highlightWeekends: 'הדגשת סוף שבוע',
+        weekendNone: 'ללא',
+        weekendSat: 'שבת',
+        weekendSun: 'ראשון',
+        weekendBoth: 'שניהם (שבת וראשון)',
+        regionalTitle: 'אזוריות',
+        language: 'שפה',
+        startWeek: 'תחילת שבוע',
+        sunday: 'ראשון',
+        monday: 'שני',
+        jewishCalendar: 'לוח שנה עברי',
+        enabled: 'מופעל',
+        disabled: 'כבוי',
+        layoutTitle: 'פרטי תצוגה',
+        dayNumSize: 'גודל מספר יום',
+        dayNumAlign: 'יישור מספר יום',
+        dayNameSize: 'גודל שם יום',
+        dayNameAlign: 'יישור שם יום',
+        left: 'שמאל',
+        center: 'מרכז',
+        right: 'ימין',
+        sm: 'S',
+        md: 'M',
+        lg: 'L',
+        xl: 'XL'
+    }
+};
+
 interface SettingsModalProps {
     isOpen: boolean;
     onClose: () => void;
@@ -9,6 +108,7 @@ interface SettingsModalProps {
 
 export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose }) => {
     const { settings, updateSettings } = useAppStore();
+    const t = TRANSLATIONS[settings.language];
 
     if (!isOpen) return null;
 
@@ -25,7 +125,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
 
                 {/* Header */}
                 <div className="flex justify-between items-center px-8 py-6 border-b border-slate-700 bg-slate-900/50">
-                    <h2 className="text-2xl font-light text-white">Settings</h2>
+                    <h2 className="text-2xl font-light text-white">{t.title}</h2>
                     <button onClick={onClose} className="p-2 hover:bg-slate-800 rounded-full transition-colors text-slate-400 hover:text-white">
                         <X size={24} />
                     </button>
@@ -37,41 +137,41 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
                     {/* Section: Appearance */}
                     <section>
                         <h3 className="flex items-center gap-2 text-sky-400 font-semibold uppercase tracking-wider text-sm mb-6">
-                            <Palette size={16} /> Theme & Appearance
+                            <Palette size={16} /> {t.themeTitle}
                         </h3>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             {/* Theme */}
                             <div className="space-y-3">
-                                <label className="text-slate-300 text-sm font-medium">Color Theme</label>
+                                <label className="text-slate-300 text-sm font-medium">{t.colorTheme}</label>
                                 <div className="flex gap-2">
                                     <button
                                         onClick={() => updateSettings({ theme: 'dark' })}
                                         className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl border transition-all ${settings.theme === 'dark' ? 'bg-slate-800 border-sky-500 text-sky-400' : 'border-slate-700 text-slate-400 hover:bg-slate-800'}`}
                                     >
-                                        <Moon size={18} /> Dark
+                                        <Moon size={18} /> {t.dark}
                                     </button>
                                     <button
                                         onClick={() => updateSettings({ theme: 'light' })}
                                         className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl border transition-all ${settings.theme === 'light' ? 'bg-slate-100 border-sky-500 text-sky-600' : 'border-slate-700 text-slate-400 hover:bg-slate-800'}`}
                                     >
-                                        <Sun size={18} /> Light
+                                        <Sun size={18} /> {t.light}
                                     </button>
                                 </div>
                             </div>
 
                             {/* Weekend Highlight */}
                             <div className="space-y-3">
-                                <label className="text-slate-300 text-sm font-medium">Highlight Weekends</label>
+                                <label className="text-slate-300 text-sm font-medium">{t.highlightWeekends}</label>
                                 <select
                                     className="w-full bg-slate-800 border border-slate-700 text-white rounded-xl px-4 py-3 outline-none focus:border-sky-500 appearance-none"
                                     value={settings.highlightWeekend}
                                     onChange={(e) => updateSettings({ highlightWeekend: e.target.value as WeekendMode })}
                                 >
-                                    <option value="none">None</option>
-                                    <option value="sat">Saturday</option>
-                                    <option value="sun">Sunday</option>
-                                    <option value="both">Both (Sat & Sun)</option>
+                                    <option value="none">{t.weekendNone}</option>
+                                    <option value="sat">{t.weekendSat}</option>
+                                    <option value="sun">{t.weekendSun}</option>
+                                    <option value="both">{t.weekendBoth}</option>
                                 </select>
                             </div>
                         </div>
@@ -80,13 +180,13 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
                     {/* Section: Regional */}
                     <section>
                         <h3 className="flex items-center gap-2 text-sky-400 font-semibold uppercase tracking-wider text-sm mb-6">
-                            <Globe size={16} /> Regional
+                            <Globe size={16} /> {t.regionalTitle}
                         </h3>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             {/* Language */}
                             <div className="space-y-3">
-                                <label className="text-slate-300 text-sm font-medium">Language</label>
+                                <label className="text-slate-300 text-sm font-medium">{t.language}</label>
                                 <select
                                     className="w-full bg-slate-800 border border-slate-700 text-white rounded-xl px-4 py-3 outline-none focus:border-sky-500"
                                     value={settings.language}
@@ -100,31 +200,31 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
 
                             {/* Start of Week */}
                             <div className="space-y-3">
-                                <label className="text-slate-300 text-sm font-medium">Start Week On</label>
+                                <label className="text-slate-300 text-sm font-medium">{t.startWeek}</label>
                                 <div className="flex bg-slate-800 p-1 rounded-xl">
                                     <button
                                         onClick={() => updateSettings({ weekStart: 0 })}
                                         className={`flex-1 py-2 rounded-lg text-sm font-medium transition-all ${settings.weekStart === 0 ? 'bg-slate-600 text-white shadow-sm' : 'text-slate-400 hover:text-white'}`}
                                     >
-                                        Sunday
+                                        {t.sunday}
                                     </button>
                                     <button
                                         onClick={() => updateSettings({ weekStart: 1 })}
                                         className={`flex-1 py-2 rounded-lg text-sm font-medium transition-all ${settings.weekStart === 1 ? 'bg-slate-600 text-white shadow-sm' : 'text-slate-400 hover:text-white'}`}
                                     >
-                                        Monday
+                                        {t.monday}
                                     </button>
                                 </div>
                             </div>
 
                             {/* Show Jewish Calendar */}
                             <div className="space-y-3">
-                                <label className="text-slate-300 text-sm font-medium">Jewish Calendar</label>
+                                <label className="text-slate-300 text-sm font-medium">{t.jewishCalendar}</label>
                                 <button
                                     onClick={() => updateSettings({ showJewishCalendar: !settings.showJewishCalendar })}
                                     className={`w-full py-2 rounded-lg text-sm font-medium transition-all border ${settings.showJewishCalendar ? 'bg-sky-900 border-sky-500 text-sky-400 shadow-sm' : 'border-slate-700 text-slate-400 hover:text-white'}`}
                                 >
-                                    {settings.showJewishCalendar ? 'Enabled' : 'Disabled'}
+                                    {settings.showJewishCalendar ? t.enabled : t.disabled}
                                 </button>
                             </div>
                         </div>
@@ -133,13 +233,13 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
                     {/* Section: Layout Detail */}
                     <section>
                         <h3 className="flex items-center gap-2 text-sky-400 font-semibold uppercase tracking-wider text-sm mb-6">
-                            <Layout size={16} /> Layout Details
+                            <Layout size={16} /> {t.layoutTitle}
                         </h3>
 
                         <div className="grid grid-cols-2 gap-6">
                             {/* Number Size */}
                             <div className="space-y-3">
-                                <label className="text-slate-300 text-sm font-medium">Day Number Size</label>
+                                <label className="text-slate-300 text-sm font-medium">{t.dayNumSize}</label>
                                 <div className="flex gap-2">
                                     {(['sm', 'md', 'lg', 'xl'] as Size[]).map(s => (
                                         <button
@@ -147,7 +247,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
                                             onClick={() => updateSettings({ dayNumberSize: s })}
                                             className={`flex-1 py-2 border rounded-lg uppercase text-xs font-bold ${settings.dayNumberSize === s ? 'bg-sky-900 border-sky-500 text-sky-400' : 'border-slate-700 text-slate-500'}`}
                                         >
-                                            {s}
+                                            {t[s]}
                                         </button>
                                     ))}
                                 </div>
@@ -155,7 +255,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
 
                             {/* Number Align */}
                             <div className="space-y-3">
-                                <label className="text-slate-300 text-sm font-medium">Day Number Align</label>
+                                <label className="text-slate-300 text-sm font-medium">{t.dayNumAlign}</label>
                                 <div className="flex gap-2">
                                     {(['left', 'center', 'right'] as Alignment[]).map(a => (
                                         <button
@@ -163,7 +263,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
                                             onClick={() => updateSettings({ dayNumberAlign: a })}
                                             className={`flex-1 py-2 border rounded-lg text-xs font-bold capitalize ${settings.dayNumberAlign === a ? 'bg-sky-900 border-sky-500 text-sky-400' : 'border-slate-700 text-slate-500'}`}
                                         >
-                                            {a}
+                                            {t[a]}
                                         </button>
                                     ))}
                                 </div>
@@ -171,7 +271,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
 
                             {/* Name Size */}
                             <div className="space-y-3">
-                                <label className="text-slate-300 text-sm font-medium">Day Name Size</label>
+                                <label className="text-slate-300 text-sm font-medium">{t.dayNameSize}</label>
                                 <div className="flex gap-2">
                                     {(['sm', 'md', 'lg'] as Size[]).map(s => (
                                         <button
@@ -179,7 +279,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
                                             onClick={() => updateSettings({ dayNameSize: s })}
                                             className={`flex-1 py-2 border rounded-lg uppercase text-xs font-bold ${settings.dayNameSize === s ? 'bg-sky-900 border-sky-500 text-sky-400' : 'border-slate-700 text-slate-500'}`}
                                         >
-                                            {s}
+                                            {t[s]}
                                         </button>
                                     ))}
                                 </div>
@@ -187,7 +287,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
 
                             {/* Name Align */}
                             <div className="space-y-3">
-                                <label className="text-slate-300 text-sm font-medium">Day Name Align</label>
+                                <label className="text-slate-300 text-sm font-medium">{t.dayNameAlign}</label>
                                 <div className="flex gap-2">
                                     {(['left', 'center', 'right'] as Alignment[]).map(a => (
                                         <button
@@ -195,7 +295,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
                                             onClick={() => updateSettings({ dayNameAlign: a })}
                                             className={`flex-1 py-2 border rounded-lg text-xs font-bold capitalize ${settings.dayNameAlign === a ? 'bg-sky-900 border-sky-500 text-sky-400' : 'border-slate-700 text-slate-500'}`}
                                         >
-                                            {a}
+                                            {t[a]}
                                         </button>
                                     ))}
                                 </div>

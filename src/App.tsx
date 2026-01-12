@@ -102,7 +102,7 @@ const DashboardContent: React.FC = () => {
               onClick={() => navigate('prev')}
               className="p-2 rounded-full hover:bg-surface-hover text-text-muted hover:text-text-main transition-colors"
             >
-              <ChevronLeft size={28} />
+              {settings.language === 'he' ? <ChevronRight size={28} /> : <ChevronLeft size={28} />}
             </button>
 
             <div
@@ -124,7 +124,7 @@ const DashboardContent: React.FC = () => {
               onClick={() => navigate('next')}
               className="p-2 rounded-full hover:bg-surface-hover text-text-muted hover:text-text-main transition-colors"
             >
-              <ChevronRight size={28} />
+              {settings.language === 'he' ? <ChevronLeft size={28} /> : <ChevronRight size={28} />}
             </button>
 
             {/* Reset / Jump to Today Button (Visible only if not current month) */}
