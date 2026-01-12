@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useAppStore, type Language, type WeekendMode, type Size, type Alignment, IMAGE_CATEGORIES, type CustomTheme } from '../../store/AppContext';
+import { useAppStore, type Language, type Size, type Alignment, IMAGE_CATEGORIES, type CustomTheme } from '../../store/AppContext';
 import { X, Moon, Sun, Globe, Layout, Palette, Image as ImageIcon, Folder, Clock } from 'lucide-react';
 
 import { TRANSLATIONS } from '../../utils/translations';
@@ -162,9 +162,9 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
                     {/* Sidebar Tabs */}
                     <div className="w-64 bg-slate-950/50 border-r border-slate-700 p-4 flex flex-col gap-2">
                         {[
-                            { id: 'general', icon: Globe, label: 'General' },
-                            { id: 'appearance', icon: Palette, label: 'Appearance' },
-                            { id: 'media', icon: ImageIcon, label: 'Media' }
+                            { id: 'general', icon: Globe, label: t.tabGeneral || 'General' },
+                            { id: 'appearance', icon: Palette, label: t.tabAppearance || 'Appearance' },
+                            { id: 'media', icon: ImageIcon, label: t.tabMedia || 'Media' }
                         ].map(tab => (
                             <button
                                 key={tab.id}
@@ -208,13 +208,13 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
                                         </div>
 
                                         <div className="space-y-3">
-                                            <label className="text-slate-300 text-sm font-medium">National Holidays / Pays</label>
+                                            <label className="text-slate-300 text-sm font-medium">{t.nationalHolidays}</label>
                                             <select
                                                 className="w-full bg-slate-800 border border-slate-700 text-white rounded-xl px-4 py-3 outline-none focus:border-sky-500 appearance-none"
                                                 value={settings.country || ''}
                                                 onChange={(e) => updateSettings({ country: e.target.value })}
                                             >
-                                                <option value="">None</option>
+                                                <option value="">{t.none}</option>
                                                 {countries.map((c) => (
                                                     <option key={c.country} value={c.country}>{c.country}</option>
                                                 ))}
@@ -224,7 +224,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
 
                                     {/* Calendars */}
                                     <div className="space-y-3">
-                                        <label className="text-slate-300 text-sm font-medium">Active Calendars</label>
+                                        <label className="text-slate-300 text-sm font-medium">{t.activeCalendars}</label>
                                         <div className="grid grid-cols-2 gap-4">
                                             {[
                                                 { id: 'jewish', label: t.jewishCalendar },
@@ -282,26 +282,26 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
 
                                 {/* Custom Colors */}
                                 <section className="space-y-6">
-                                    <h3 className="text-sky-400 font-semibold uppercase tracking-wider text-sm opacity-80">Custom Theme Colors</h3>
+                                    <h3 className="text-sky-400 font-semibold uppercase tracking-wider text-sm opacity-80">{t.appearanceCustomize}</h3>
 
                                     <div className="grid grid-cols-2 gap-8">
                                         {/* Dark Theme Colors */}
                                         <div className="space-y-4 p-5 rounded-2xl bg-slate-800/30 border border-slate-700/50">
                                             <h4 className="flex items-center gap-2 text-slate-300 font-medium pb-2 border-b border-slate-700/50 mb-2">
-                                                <Moon size={14} /> Dark Mode Colors
+                                                <Moon size={14} /> {t.appearanceDark}
                                             </h4>
                                             <ColorInput
-                                                label="Primary Color"
+                                                label={t.appearancePrimary}
                                                 value={settings.customDarkTheme?.primary || '#0ea5e9'}
                                                 onChange={(val) => updateThemeColor('dark', 'primary', val)}
                                             />
                                             <ColorInput
-                                                label="Background"
+                                                label={t.appearanceBackground}
                                                 value={settings.customDarkTheme?.background || '#0f172a'}
                                                 onChange={(val) => updateThemeColor('dark', 'background', val)}
                                             />
                                             <ColorInput
-                                                label="Surface"
+                                                label={t.appearanceSurface}
                                                 value={settings.customDarkTheme?.surface || '#1e293b'}
                                                 onChange={(val) => updateThemeColor('dark', 'surface', val)}
                                             />
@@ -310,20 +310,20 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
                                         {/* Light Theme Colors */}
                                         <div className="space-y-4 p-5 rounded-2xl bg-slate-100/5 border border-slate-700/50">
                                             <h4 className="flex items-center gap-2 text-slate-300 font-medium pb-2 border-b border-slate-700/50 mb-2">
-                                                <Sun size={14} /> Light Mode Colors
+                                                <Sun size={14} /> {t.appearanceLight}
                                             </h4>
                                             <ColorInput
-                                                label="Primary Color"
+                                                label={t.appearancePrimary}
                                                 value={settings.customLightTheme?.primary || '#0ea5e9'}
                                                 onChange={(val) => updateThemeColor('light', 'primary', val)}
                                             />
                                             <ColorInput
-                                                label="Background"
+                                                label={t.appearanceBackground}
                                                 value={settings.customLightTheme?.background || '#ffffff'}
                                                 onChange={(val) => updateThemeColor('light', 'background', val)}
                                             />
                                             <ColorInput
-                                                label="Surface"
+                                                label={t.appearanceSurface}
                                                 value={settings.customLightTheme?.surface || '#f8fafc'}
                                                 onChange={(val) => updateThemeColor('light', 'surface', val)}
                                             />
@@ -369,7 +369,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
                             <div className="space-y-10 max-w-2xl animate-in fade-in slide-in-from-right-4 duration-300">
                                 <section className="space-y-6">
                                     <h3 className="text-sky-400 font-semibold uppercase tracking-wider text-sm flex items-center gap-2">
-                                        <ImageIcon size={16} /> Media Settings
+                                        <ImageIcon size={16} /> {t.mediaTitle}
                                     </h3>
 
                                     {/* Source Type */}
@@ -379,21 +379,21 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
                                             className={`flex-1 flex flex-col items-center gap-3 p-6 rounded-2xl border transition-all ${settings.imageSource === 'category' ? 'bg-sky-500/10 border-sky-500 text-sky-400' : 'bg-slate-800/30 border-slate-700 text-slate-400 hover:bg-slate-800'}`}
                                         >
                                             <ImageIcon size={32} />
-                                            <span className="font-medium">Category</span>
+                                            <span className="font-medium">{t.imgSourceCategory}</span>
                                         </button>
                                         <button
                                             onClick={() => updateSettings({ imageSource: 'local' })}
                                             className={`flex-1 flex flex-col items-center gap-3 p-6 rounded-2xl border transition-all ${settings.imageSource === 'local' ? 'bg-sky-500/10 border-sky-500 text-sky-400' : 'bg-slate-800/30 border-slate-700 text-slate-400 hover:bg-slate-800'}`}
                                         >
                                             <Folder size={32} />
-                                            <span className="font-medium">Local Directory</span>
+                                            <span className="font-medium">{t.imgSourceLocal}</span>
                                         </button>
                                     </div>
 
                                     {/* Conditional Input */}
                                     {settings.imageSource === 'category' ? (
                                         <div className="space-y-3 animate-in fade-in zoom-in-95">
-                                            <label className="text-slate-300 text-sm font-medium">Select Categories (Multi-select)</label>
+                                            <label className="text-slate-300 text-sm font-medium">{t.mediaMultiSelect}</label>
                                             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                                                 {IMAGE_CATEGORIES.map(cat => {
                                                     const isSelected = settings.imageCategories?.includes(cat);
@@ -417,7 +417,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
                                         </div>
                                     ) : (
                                         <div className="space-y-3 animate-in fade-in zoom-in-95">
-                                            <label className="text-slate-300 text-sm font-medium">Local Directory Path</label>
+                                            <label className="text-slate-300 text-sm font-medium">{t.mediaLocalPath}</label>
                                             <div className="relative">
                                                 <input
                                                     type="text"
@@ -429,7 +429,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
                                                 <Folder className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
                                             </div>
                                             <p className="text-xs text-slate-500">
-                                                Note: For browser availability, ensure your local server can serve these files or use a public URL.
+                                                {t.mediaNote}
                                             </p>
                                         </div>
                                     )}
@@ -438,12 +438,12 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
                                 {/* Frequency Slider */}
                                 <section className="space-y-6">
                                     <h3 className="text-sky-400 font-semibold uppercase tracking-wider text-sm flex items-center gap-2">
-                                        <Clock size={16} /> Rotation Frequency
+                                        <Clock size={16} /> {t.mediaFrequency}
                                     </h3>
 
                                     <div className="bg-slate-800/50 p-6 rounded-2xl border border-slate-700/50 space-y-4">
                                         <div className="flex justify-between items-end">
-                                            <label className="text-slate-300 font-medium">Change Image Every</label>
+                                            <label className="text-slate-300 font-medium">{t.mediaInterval}</label>
                                             <span className="text-2xl font-bold text-sky-400 font-mono">
                                                 {formatDuration(settings.imageChangeFrequency || 3600000)}
                                             </span>

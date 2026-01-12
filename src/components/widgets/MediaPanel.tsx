@@ -1,9 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { useAppStore } from '../../store/AppContext';
 import { getNextImage, loadImageCategories } from '../../services/ImageService';
+import { TRANSLATIONS } from '../../utils/translations';
 
 export const MediaPanel: React.FC = () => {
     const { settings } = useAppStore();
+    const t = new Proxy(TRANSLATIONS[settings.language] || {}, {
+        get: (target, prop: string) => target[prop] || TRANSLATIONS['en'][prop] || prop
+    }) as Record<string, string>;
+
     const [currentImage, setCurrentImage] = useState<string>('');
     const [fade, setFade] = useState(false);
 
@@ -48,12 +53,12 @@ export const MediaPanel: React.FC = () => {
                 />
             ) : (
                 <div className="w-full h-full flex items-center justify-center text-slate-600">
-                    No image source selected
+                    {t.mediaNoSource}
                 </div>
             )}
 
             <div className="absolute bottom-8 left-8 text-white/80 text-sm font-light tracking-wide bg-black/20 backdrop-blur-sm px-4 py-2 rounded-full">
-                {settings.imageSource === 'local' ? 'Local Source' : settings.imageCategories?.join(' • ') || 'Gallery'}
+                {settings.imageSource === 'local' ? t.imgSourceLocal : settings.imageCategories?.join(' • ') || t.mediaGallery}
             </div>
         </div>
     );

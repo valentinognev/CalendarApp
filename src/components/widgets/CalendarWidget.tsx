@@ -36,7 +36,7 @@ const TEXT_ALIGN_MAP: Record<string, string> = {
 };
 
 export const CalendarWidget: React.FC = () => {
-    const { settings, currentDate, getEventsForDate, location, direction } = useAppStore();
+    const { settings, currentDate, getEventsForDate, location, direction, viewMode } = useAppStore();
     const [selectedDate, setSelectedDate] = useState<Date | null>(null);
     const [jewishHolidays, setJewishHolidays] = useState<JewishHoliday[]>([]);
     const [muslimHolidays, setMuslimHolidays] = useState<MuslimHoliday[]>([]);
@@ -76,16 +76,24 @@ export const CalendarWidget: React.FC = () => {
     const currentLocale = getLocale(settings.language);
     const weekStartParams = { weekStartsOn: settings.weekStart as 0 | 1, locale: currentLocale };
 
-    const renderMonthView = () => {
+    const renderCalendarGrid = () => {
+        let startDate: Date;
+        let endDate: Date;
         const monthStart = startOfMonth(currentDate);
-        const monthEnd = endOfMonth(currentDate);
-        const startDate = startOfWeek(monthStart, weekStartParams);
-        const endDate = endOfWeek(monthEnd, weekStartParams);
+
+        if (viewMode === 'week') {
+            startDate = startOfWeek(currentDate, weekStartParams);
+            endDate = endOfWeek(currentDate, weekStartParams);
+        } else {
+            const monthEnd = endOfMonth(currentDate);
+            startDate = startOfWeek(monthStart, weekStartParams);
+            endDate = endOfWeek(monthEnd, weekStartParams);
+        }
 
         const calendarDays = eachDayOfInterval({ start: startDate, end: endDate });
         const weekDays = eachDayOfInterval({
-            start: startDate,
-            end: endOfWeek(startDate, weekStartParams)
+            start: startOfWeek(currentDate, weekStartParams),
+            end: endOfWeek(currentDate, weekStartParams)
         });
 
         // Corner Styles
@@ -111,9 +119,9 @@ export const CalendarWidget: React.FC = () => {
                 </div>
 
                 {/* Grid */}
-                <div className="grid grid-cols-7 grid-rows-5 gap-4 flex-grow">
+                <div className={`grid grid-cols-7 gap-4 flex-grow ${viewMode === 'week' ? 'grid-rows-1' : 'grid-rows-5'}`}>
                     {calendarDays.map((day) => {
-                        const isCurrentMonth = isSameMonth(day, monthStart);
+                        const isCurrentMonth = viewMode === 'week' ? true : isSameMonth(day, monthStart);
                         const isDayToday = isToday(day);
                         const isDayWeekend = isWeekend(day);
                         const dayEvents = getEventsForDate(day);
@@ -302,7 +310,7 @@ export const CalendarWidget: React.FC = () => {
 
     return (
         <div className="flex-grow flex flex-col h-full overflow-hidden mt-2">
-            {renderMonthView()}
+            {renderCalendarGrid()}
 
             {selectedDate && (
                 <EventModal
