@@ -2,7 +2,7 @@ import React from 'react';
 import { useAppStore, type Language, type WeekendMode, type Size, type Alignment } from '../../store/AppContext';
 import { X, Moon, Sun, Globe, Layout, Palette } from 'lucide-react';
 
-const TRANSLATIONS = {
+const TRANSLATIONS: Record<string, Record<string, string>> = {
     en: {
         title: 'Settings',
         themeTitle: 'Theme & Appearance',
