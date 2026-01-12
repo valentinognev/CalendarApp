@@ -58,6 +58,7 @@ interface AppState {
     addEvent: (event: CalendarEvent) => void;
     deleteEvent: (id: string) => void;
     getEventsForDate: (date: Date) => CalendarEvent[];
+    location: { lat: number; long: number } | null;
 }
 
 const AppContext = createContext<AppState | undefined>(undefined);
@@ -160,9 +161,29 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         });
     };
 
+    const [location, setLocation] = useState<{ lat: number; long: number } | null>(null);
+
+    useEffect(() => {
+        if ('geolocation' in navigator) {
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    setLocation({
+                        lat: position.coords.latitude,
+                        long: position.coords.longitude
+                    });
+                },
+                (error) => {
+                    console.error('Geolocation denied or failed:', error);
+                    // Default to Jerusalem? Or just don't show times. 
+                    // Let's leave null to indicate "no local data"
+                }
+            );
+        }
+    }, []);
+
     return (
         <AppContext.Provider value={{
-            viewMode, isSplit, settings, currentDate, events,
+            viewMode, isSplit, settings, currentDate, events, location,
             toggleView, toggleSplit, updateSettings, navigate, jumpToToday,
             addEvent, deleteEvent, getEventsForDate
         }}>

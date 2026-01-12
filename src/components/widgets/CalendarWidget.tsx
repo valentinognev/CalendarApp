@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useAppStore } from '../../store/AppContext';
-import { startOfMonth, endOfMonth, startOfWeek, endOfWeek, eachDayOfInterval, format, isSameMonth, isToday, isWeekend } from 'date-fns';
+import { startOfMonth, endOfMonth, startOfWeek, endOfWeek, eachDayOfInterval, format, isSameMonth, isToday, isWeekend, addMinutes, subMinutes, parse } from 'date-fns';
 import { enUS, ru, he } from 'date-fns/locale';
 import { HDate } from '@hebcal/core';
 import { EventModal } from '../events/EventModal';
 import { fetchJewishHolidays, type JewishHoliday } from '../../services/JewishHolidayService';
+import { fetchSunsetTimes, getSunsetTime } from '../../services/SunsetService';
 
 const LOCALE_MAP: Record<string, any> = {
     en: enUS,
@@ -39,16 +40,21 @@ const TEXT_ALIGN_MAP: Record<string, string> = {
 };
 
 export const CalendarWidget: React.FC = () => {
-    const { viewMode, settings, currentDate, getEventsForDate } = useAppStore();
+    const { viewMode, settings, currentDate, getEventsForDate, location } = useAppStore();
     const [selectedDate, setSelectedDate] = useState<Date | null>(null);
     const [csvHolidays, setCsvHolidays] = useState<JewishHoliday[]>([]);
+    const [sunsetMap, setSunsetMap] = useState<Map<number, Record<string, string>>>(new Map());
 
     useEffect(() => {
-        const loadHolidays = async () => {
-            const data = await fetchJewishHolidays();
-            setCsvHolidays(data);
+        const loadData = async () => {
+            const [holidays, sunsets] = await Promise.all([
+                fetchJewishHolidays(),
+                fetchSunsetTimes()
+            ]);
+            setCsvHolidays(holidays);
+            setSunsetMap(sunsets);
         };
-        loadHolidays();
+        loadData();
     }, []);
 
     const currentLocale = LOCALE_MAP[settings.language];
@@ -106,6 +112,7 @@ export const CalendarWidget: React.FC = () => {
                         let isFast = false;
                         let isOfficial = false;
                         let holidayName = '';
+                        let shabbatTime = '';
 
                         if (settings.showJewishCalendar) {
                             const hdate = new HDate(day);
@@ -129,12 +136,29 @@ export const CalendarWidget: React.FC = () => {
                                 else if (settings.language === 'he') holidayName = csvMatch.nameHe;
                                 else holidayName = csvMatch.nameEn;
                             } else {
-                                // Fallback logic for Rosh Chodesh if not in CSV
                                 if (isRoshChodesh) {
-                                    // Default Rosh Chodesh name if not in CSV
                                     if (settings.language === 'ru') holidayName = 'Рош Ходеш';
                                     else if (settings.language === 'he') holidayName = 'ראש חודש';
                                     else holidayName = 'Rosh Chodesh';
+                                }
+                            }
+
+                            // Shabbat Times via Sunset Table
+                            if (location) {
+                                const dayOfWeek = day.getDay();
+                                const sunsetStr = getSunsetTime(day, location.lat, sunsetMap);
+
+                                if (sunsetStr) {
+                                    // Parse sunset time to a Date object on the current day
+                                    const sunsetDate = parse(sunsetStr, 'HH:mm', day);
+
+                                    if (dayOfWeek === 5) { // Friday -> Candles (-18m)
+                                        const candles = subMinutes(sunsetDate, 18);
+                                        shabbatTime = `🕯️ ${format(candles, 'HH:mm')}`;
+                                    } else if (dayOfWeek === 6) { // Saturday -> Havdalah (+42m)
+                                        const havdalah = addMinutes(sunsetDate, 42);
+                                        shabbatTime = `✨ ${format(havdalah, 'HH:mm')}`;
+                                    }
                                 }
                             }
                         }
@@ -147,12 +171,15 @@ export const CalendarWidget: React.FC = () => {
                         } else if (isCholHaMoed) {
                             badgeStyle = 'w-10 h-10 flex items-center justify-center bg-orange-500 text-white rounded-full shadow-md text-xl font-bold z-10';
                         } else if (isFast) {
-                            badgeStyle = 'w-10 h-10 flex items-center justify-center bg-amber-700 text-white rounded-full shadow-md text-xl font-bold z-10'; // Dark orange/brown for fasts?
+                            badgeStyle = 'w-10 h-10 flex items-center justify-center bg-amber-700 text-white rounded-full shadow-md text-xl font-bold z-10';
                         } else if (isErev) {
                             badgeStyle = 'w-10 h-10 flex items-center justify-center bg-green-500 text-white rounded-full shadow-md text-xl font-bold z-10';
                         } else if (isRoshChodesh) {
                             badgeStyle = 'w-10 h-10 flex items-center justify-center bg-cyan-600 text-white rounded-full shadow-md text-xl font-bold z-10';
                         }
+
+                        // Determine if holiday name/time needs space
+                        // const hasJewishContent = settings.showJewishCalendar && (holidayName || shabbatTime);
 
                         return (
                             <div
@@ -174,7 +201,7 @@ export const CalendarWidget: React.FC = () => {
                                     {format(day, 'd')}
                                 </span>
 
-                                {/* Jewish Day Number (opposite corner) */}
+                                {/* Jewish Day Number + Holiday Name + Shabbat Time */}
                                 {settings.showJewishCalendar && (
                                     <>
                                         <span className={`absolute ${settings.language === 'he'
@@ -183,16 +210,23 @@ export const CalendarWidget: React.FC = () => {
                                             } ${badgeStyle}`}>
                                             {jewishDayStr}
                                         </span>
-                                        {holidayName && (
-                                            <div className="absolute bottom-1 left-0 right-0 text-[10px] font-semibold text-center text-primary/80 leading-tight w-full truncate px-1">
-                                                {holidayName}
-                                            </div>
-                                        )}
+                                        <div className="absolute bottom-1 left-0 right-0 flex flex-col items-center justify-end pointer-events-none gap-0.5">
+                                            {holidayName && (
+                                                <div className="text-[10px] font-semibold text-center text-primary/80 leading-tight w-full truncate px-1">
+                                                    {holidayName}
+                                                </div>
+                                            )}
+                                            {shabbatTime && (
+                                                <div className="text-[10px] font-mono font-medium text-text-muted bg-surface/80 px-1 rounded-sm shadow-sm">
+                                                    {shabbatTime}
+                                                </div>
+                                            )}
+                                        </div>
                                     </>
                                 )}
 
                                 {/* Events List */}
-                                <div className={`w-full mt-1 flex flex-col gap-1 ${settings.dayNumberAlign === 'center' ? 'items-center' : settings.dayNumberAlign === 'right' ? 'items-end' : 'items-start'}`}>
+                                <div className={`w-full mt-1 flex flex-col gap-1 ${settings.dayNumberAlign === 'center' ? 'items-center' : settings.dayNumberAlign === 'right' ? 'items-end' : 'items-start'} ${(holidayName || shabbatTime) && settings.showJewishCalendar ? 'mb-6' : ''}`}>
                                     {dayEvents.slice(0, 3).map(e => (
                                         <div key={e.id} className="text-[10px] bg-sky-500/10 text-sky-400 px-1.5 py-0.5 rounded-md truncate max-w-full border border-sky-500/20">
                                             {e.title}
@@ -236,6 +270,7 @@ export const CalendarWidget: React.FC = () => {
                     let isFast = false;
                     let isOfficial = false;
                     let holidayName = '';
+                    let shabbatTime = '';
 
                     if (settings.showJewishCalendar) {
                         const hdate = new HDate(day);
@@ -259,12 +294,29 @@ export const CalendarWidget: React.FC = () => {
                             else if (settings.language === 'he') holidayName = csvMatch.nameHe;
                             else holidayName = csvMatch.nameEn;
                         } else {
-                            // Fallback logic for Rosh Chodesh if not in CSV
                             if (isRoshChodesh) {
-                                // Default Rosh Chodesh name if not in CSV
                                 if (settings.language === 'ru') holidayName = 'Рош Ходеш';
                                 else if (settings.language === 'he') holidayName = 'ראש חודש';
                                 else holidayName = 'Rosh Chodesh';
+                            }
+                        }
+
+                        // Shabbat Times via Sunset Table
+                        if (location) {
+                            const dayOfWeek = day.getDay();
+                            const sunsetStr = getSunsetTime(day, location.lat, sunsetMap);
+
+                            if (sunsetStr) {
+                                // Parse sunset time to a Date object on the current day
+                                const sunsetDate = parse(sunsetStr, 'HH:mm', day);
+
+                                if (dayOfWeek === 5) { // Friday -> Candles (-18m)
+                                    const candles = subMinutes(sunsetDate, 18);
+                                    shabbatTime = `🕯️ ${format(candles, 'HH:mm')}`;
+                                } else if (dayOfWeek === 6) { // Saturday -> Havdalah (+42m)
+                                    const havdalah = addMinutes(sunsetDate, 42);
+                                    shabbatTime = `✨ ${format(havdalah, 'HH:mm')}`;
+                                }
                             }
                         }
                     }
@@ -282,6 +334,9 @@ export const CalendarWidget: React.FC = () => {
                     } else if (isRoshChodesh) {
                         badgeStyle = 'w-10 h-10 flex items-center justify-center bg-cyan-600 text-white rounded-full shadow-md text-xl font-bold z-10';
                     }
+
+                    // Determine if holiday name/time needs space
+                    const hasJewishContent = settings.showJewishCalendar && (holidayName || shabbatTime);
 
                     return (
                         <div
@@ -313,11 +368,18 @@ export const CalendarWidget: React.FC = () => {
                                         } ${badgeStyle}`}>
                                         {jewishDayStr}
                                     </span>
-                                    {holidayName && (
-                                        <div className="absolute bottom-4 left-0 right-0 text-xs font-semibold text-center text-primary/80 leading-tight w-full truncate px-2">
-                                            {holidayName}
-                                        </div>
-                                    )}
+                                    <div className="absolute bottom-4 left-0 right-0 flex flex-col items-center justify-end pointer-events-none gap-1">
+                                        {holidayName && (
+                                            <div className="text-xs font-semibold text-center text-primary/80 leading-tight w-full truncate px-2">
+                                                {holidayName}
+                                            </div>
+                                        )}
+                                        {shabbatTime && (
+                                            <div className="text-xs font-mono font-medium text-text-muted bg-surface/80 px-1 rounded-sm shadow-sm">
+                                                {shabbatTime}
+                                            </div>
+                                        )}
+                                    </div>
                                 </>
                             )}
 
