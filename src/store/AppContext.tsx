@@ -19,6 +19,18 @@ export interface CalendarEvent {
     recurrence: Recurrence;
 }
 
+export interface CustomTheme {
+    primary: string;
+    background: string;
+    surface: string;
+}
+
+export const IMAGE_CATEGORIES = [
+    'Nature', 'Science', 'Technology', 'People', 'Cars', 'Architecture',
+    'Abstract', 'Animals', 'Space', 'Ocean', 'Forest', 'City',
+    'Food', 'Interiors', 'Art', 'Travel', 'Sports', 'Music', 'Business', 'Minimalism'
+];
+
 export interface Settings {
     language: Language;
     theme: Theme;
@@ -31,6 +43,14 @@ export interface Settings {
     timeFormat: '12' | '24';
     activeCalendars: string[]; // e.g., 'jewish', 'muslim'
     country: string; // For National Holidays
+
+    // New Features
+    customDarkTheme?: CustomTheme;
+    customLightTheme?: CustomTheme;
+    imageSource: 'category' | 'local';
+    imageCategories: string[]; // Changed to array
+    localImagePath: string;
+    imageChangeFrequency: number; // in milliseconds
 }
 
 const DEFAULT_SETTINGS: Settings = {
@@ -45,6 +65,12 @@ const DEFAULT_SETTINGS: Settings = {
     timeFormat: '24',
     activeCalendars: [],
     country: 'United States', // Default
+
+    // New Defaults
+    imageSource: 'category',
+    imageCategories: ['Nature'], // Default array
+    localImagePath: '',
+    imageChangeFrequency: 3600000, // 1 hour
 };
 
 interface AppState {

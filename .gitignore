@@ -22,3 +22,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Downloaded Images
+public/UtilityFiles/Media/Images/

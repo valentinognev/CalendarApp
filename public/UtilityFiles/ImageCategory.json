@@ -1,0 +1,152 @@
+[
+    {
+        "id": "nature",
+        "name": "Nature",
+        "path": "/UtilityFiles/Media/Images/Nature",
+        "allowed": true
+    },
+    {
+        "id": "science",
+        "name": "Science",
+        "path": "/UtilityFiles/Media/Images/Science",
+        "allowed": true
+    },
+    {
+        "id": "technology",
+        "name": "Technology",
+        "path": "/UtilityFiles/Media/Images/Technology",
+        "allowed": true
+    },
+    {
+        "id": "people",
+        "name": "People",
+        "path": "/UtilityFiles/Media/Images/People",
+        "allowed": true
+    },
+    {
+        "id": "cars",
+        "name": "Cars",
+        "path": "/UtilityFiles/Media/Images/Cars",
+        "allowed": true
+    },
+    {
+        "id": "architecture",
+        "name": "Architecture",
+        "path": "/UtilityFiles/Media/Images/Architecture",
+        "allowed": true
+    },
+    {
+        "id": "abstract",
+        "name": "Abstract",
+        "path": "/UtilityFiles/Media/Images/Abstract",
+        "allowed": true
+    },
+    {
+        "id": "animals",
+        "name": "Animals",
+        "path": "/UtilityFiles/Media/Images/Animals",
+        "allowed": true
+    },
+    {
+        "id": "space",
+        "name": "Space",
+        "path": "/UtilityFiles/Media/Images/Space",
+        "allowed": true
+    },
+    {
+        "id": "ocean",
+        "name": "Ocean",
+        "path": "/UtilityFiles/Media/Images/Ocean",
+        "allowed": true
+    },
+    {
+        "id": "forest",
+        "name": "Forest",
+        "path": "/UtilityFiles/Media/Images/Forest",
+        "allowed": true
+    },
+    {
+        "id": "city",
+        "name": "City",
+        "path": "/UtilityFiles/Media/Images/City",
+        "allowed": true
+    },
+    {
+        "id": "food",
+        "name": "Food",
+        "path": "/UtilityFiles/Media/Images/Food",
+        "allowed": true
+    },
+    {
+        "id": "interiors",
+        "name": "Interiors",
+        "path": "/UtilityFiles/Media/Images/Interiors",
+        "allowed": true
+    },
+    {
+        "id": "art",
+        "name": "Art",
+        "path": "/UtilityFiles/Media/Images/Art",
+        "allowed": true
+    },
+    {
+        "id": "travel",
+        "name": "Travel",
+        "path": "/UtilityFiles/Media/Images/Travel",
+        "allowed": true
+    },
+    {
+        "id": "sports",
+        "name": "Sports",
+        "path": "/UtilityFiles/Media/Images/Sports",
+        "allowed": true
+    },
+    {
+        "id": "music",
+        "name": "Music",
+        "path": "/UtilityFiles/Media/Images/Music",
+        "allowed": true
+    },
+    {
+        "id": "business",
+        "name": "Business",
+        "path": "/UtilityFiles/Media/Images/Business",
+        "allowed": true
+    },
+    {
+        "id": "minimalism",
+        "name": "Minimalism",
+        "path": "/UtilityFiles/Media/Images/Minimalism",
+        "allowed": true
+    },
+    {
+        "id": "fashion",
+        "name": "Fashion",
+        "path": "/UtilityFiles/Media/Images/Fashion",
+        "allowed": false
+    },
+    {
+        "id": "history",
+        "name": "History",
+        "path": "/UtilityFiles/Media/Images/History",
+        "allowed": false
+    },
+    {
+        "id": "education",
+        "name": "Education",
+        "path": "/UtilityFiles/Media/Images/Education",
+        "allowed": false
+    },
+    {
+        "id": "health",
+        "name": "Health",
+        "path": "/UtilityFiles/Media/Images/Health",
+        "allowed": false
+    },
+    {
+        "id": "gaming",
+        "name": "Gaming",
+        "path": "/UtilityFiles/Media/Images/Gaming",
+        "allowed": false
+    }
+]
