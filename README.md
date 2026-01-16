@@ -24,7 +24,7 @@ This is a modern, responsive Calendar application built with **React** and **Typ
 ### 1. Jewish Calendar System (CRITICAL)
 The application uses a hybrid approach for Jewish holidays:
 - **Calculation**: `@hebcal/core` converts Gregorian dates to Jewish dates (Day/Month/Year).
-- **Data Source (Source of Truth)**: `public/SpecialDays/JewishSpecialDays.csv`
+- **Data Source (Source of Truth)**: `public/UtilityFiles/JewishSpecialDays.csv`
 - **Logic**: 
   - On app load, `JewishHolidayService` fetches and parses this CSV.
   - The `CalendarWidget` checks this CSV data *first* for every date.
@@ -51,8 +51,10 @@ The application uses a hybrid approach for Jewish holidays:
 ```
 /
 ├── public/
-│   └── SpecialDays/
-│       └── JewishSpecialDays.csv  # <--- EDIT THIS to update holidays
+│   └── UtilityFiles/
+│       ├── JewishSpecialDays.csv  # <--- EDIT THIS (Source of Truth)
+│       ├── SunsetTimes.csv        # Sunset lookup table
+│       └── ...                    # Other config files
 ├── src/
 │   ├── components/
 │   │   ├── layout/         # App shell, split screen logic
@@ -73,6 +75,10 @@ npm run dev
 ```
 
 ## ⚠️ Notes for Future Agents
-1.  **Holiday Updates**: Always check `public/SpecialDays/JewishSpecialDays.csv` before modifying code for holiday names or dates.
+> **[READ THIS FIRST: Project Evolution & History](update.md)**
+> See `update.md` for a detailed history of changes, architectural decisions (like the switch to CSV for Zmanim), and known limitations.
+
+1.  **Holiday Updates**: Always check `public/UtilityFiles/JewishSpecialDays.csv` before modifying code for holiday names or dates.
 2.  **RTL Logic**: When adding UI components, ensure you strictly use logical specificers (start/end) where possible, or check `settings.language === 'he'` for manual flips.
 3.  **State**: `AppContext` is the central brain. If you need to add global settings, add them to `Metrics` or `Settings` interfaces there.
+
