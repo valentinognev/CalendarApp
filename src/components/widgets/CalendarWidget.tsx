@@ -194,16 +194,28 @@ export const CalendarWidget: React.FC = () => {
                                 corner: direction === 'rtl' ? topLeft : topRight
                             });
 
-                            // Shabbat Times
+                            // Shabbat & Holiday Times
                             if (location) {
                                 const dayOfWeek = day.getDay();
                                 const sunsetStr = getSunsetTime(day, location.lat, sunsetMap);
+
+                                // Lookahead for tomorrow's holiday status to show candle lighting
+                                const tomorrow = new Date(day);
+                                tomorrow.setDate(tomorrow.getDate() + 1);
+                                const hTomorrow = new HDate(tomorrow);
+                                const tomorrowMatch = jewishHolidays.find(h => h.month === hTomorrow.getMonthName() && h.day === hTomorrow.getDate());
+                                const isTomorrowOfficial = tomorrowMatch?.official || false;
+
                                 if (sunsetStr) {
                                     const sunsetDate = parse(sunsetStr, 'HH:mm', day);
-                                    if (dayOfWeek === 5) {
+
+                                    // 🕯️ Candle Lighting: Friday or Eve of Official Holiday
+                                    if (dayOfWeek === 5 || isTomorrowOfficial) {
                                         const candles = subMinutes(sunsetDate, 18);
                                         shabbatTime = `🕯️ ${format(candles, 'HH:mm')}`;
-                                    } else if (dayOfWeek === 6) {
+                                    }
+                                    // ✨ Star Appearance: Saturday or Conclusion of Official Holiday
+                                    else if (dayOfWeek === 6 || isOfficial) {
                                         const havdalah = addMinutes(sunsetDate, 42);
                                         shabbatTime = `✨ ${format(havdalah, 'HH:mm')}`;
                                     }

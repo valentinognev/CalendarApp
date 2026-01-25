@@ -4,8 +4,9 @@
 
 ### January 2026
 - **Sunset/Shabbat Integration**: Implemented `SunsetService` to calculate Shabbat entry/exit times based on location (latitude) using a lookup table (`SunsetTimes.csv`).
-- **Jewish Holidays Overhaul**: Migrated holiday data to `JewishSpecialDays.csv` and fixed language duplication/mix issues. Implemented a **Canonical Mapping Deduplication** logic to handle synonyms.
-- **Responsive Fluid UI**: Implemented **Global Dynamic Scaling** via responsive root font-size (`clamp`) and fluid grid headers. The calendar now dynamically calculates week counts (4-6 weeks) to fill the height perfectly without clipping.
+- **Jewish Holidays Overhaul**: Migrated holiday data to `JewishSpecialDays.csv`. Completed a **Full Hebrew Audit**, ensuring 100% Hebrew coverage for all holidays and fast days. Refined deduplication logic to handle multi-language overlaps seamlessly.
+- **Dynamic Holiday Timings**: Extended the Shabbat timing engine to all official holidays. The app now displays **Candle Lighting (🕯️)** on the eve of any official holiday and **Star Appearance (✨)** at its conclusion, using location-aware lookahead logic.
+- **Responsive Fluid UI**: Implemented **Global Dynamic Scaling** via responsive root font-size (`clamp`). Refined this to be **Settings-Relative**, allowing the UI to respect manual "Small/Medium/Large" user preferences while staying perfectly responsive.
 - **Location Self-Sufficiency**: Added **Automatic Geocoding Search** (via Nominatim) and Timezone-based coordinate fallback, making the Shabbat times work out-of-the-box worldwide.
 - **Portability**: Converted all data fetching to relative paths and added a modern `install.sh` for easy deployment.
 
@@ -17,15 +18,14 @@
 - **Dates**: `@hebcal/core` still handles the complex Hebrew calendar math (Gregorian <-> Hebrew).
 - **Metadata**: `public/UtilityFiles/JewishSpecialDays.csv` overrides names and types. This allows non-developers to edit holiday names and statuses (e.g., "Official" vs "Minor") without touching code.
 
-### 2. Shabbat Times (Zmanim)
-**Previous State**: Attempted to use `@hebcal/core`'s `Zmanim` class.
-**Issue**: Caused build errors and runtime crashes due to constructor incompatibilities and missing timezone data.
-**Current Solution**: `SunsetService.ts`.
+### 2. Shabbat & Holiday Times
+**Previous State**: Simple Friday/Saturday Shabbat logic.
+**Current Solution**: Expanded `SunsetService.ts` logic.
 - Uses a pre-calculated lookup table (`public/UtilityFiles/SunsetTimes.csv`) mapping Day-of-Year + Latitude to Sunset time.
-- **Logic**:
-  - Candle Lighting: Sunset - 18 minutes (Friday).
-  - Havdalah: Sunset + 42 minutes (Saturday).
-- **Trade-off**: Slightly less precise than real-time astronomical calculation, but significantly more robust and crash-proof for the MVP.
+- **Universal Timing Pattern**:
+  - **Holiday/Shabbat Eve**: Show 🕯️ Candle Lighting (Sunset - 18 minutes).
+  - **Holiday/Shabbat Conclusion**: Show ✨ Star Appearance (Sunset + 42 minutes).
+- **Automation**: Implemented a lookahead check that detects tomorrow's holiday status to automatically trigger "Eve" timings, ensuring users are always prepared for the start of a holiday.
 
 ### 3. File Structure Shifts
 - **Data Location**: moved from `public/SpecialDays/` to `public/UtilityFiles/` to centralize all CSV data sources (Languages, Country Data, Sunsets, Holidays).
