@@ -204,27 +204,51 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
             }
 
             // 2. Auto Theme Switching
-            if (settings.autoTheme && sunsetMap.size > 0) {
-                const currentTime = format(now, 'HH:mm');
+            if (settings.autoTheme) {
+                const currentTimeStr = format(now, 'HH:mm');
+                const [curH, curM] = currentTimeStr.split(':').map(Number);
+                const curMinutes = curH * 60 + curM;
+                const morningMinutes = 7 * 60; // 07:00
+
                 const effectiveLat = location?.lat ?? settings.lat;
                 const sunsetStr = getSunsetTime(now, effectiveLat, sunsetMap);
 
-                if (sunsetStr) {
-                    const isAfter7AM = currentTime >= '07:00';
-                    const isBeforeSunset = currentTime < sunsetStr;
-                    const targetTheme = (isAfter7AM && isBeforeSunset) ? 'light' : 'dark';
+                let targetTheme: Theme = 'dark';
+                let diagnosticInfo = '';
 
-                    if (settings.theme !== targetTheme) {
-                        console.log(`[AutoTheme] Switching to ${targetTheme} (Time: ${currentTime}, Sunset: ${sunsetStr})`);
-                        updateSettings({ theme: targetTheme });
-                    }
+                if (sunsetStr) {
+                    const [sunH, sunM] = sunsetStr.split(':').map(Number);
+                    const sunsetMinutes = sunH * 60 + sunM;
+                    const isBetween = (curMinutes >= morningMinutes && curMinutes < sunsetMinutes);
+                    targetTheme = isBetween ? 'light' : 'dark';
+                    diagnosticInfo = `(Sunset: ${sunsetStr})`;
+                } else {
+                    // Fallback to basic sunset (17:30) if data not loaded or no match
+                    const fallbackSunset = 17 * 60 + 30;
+                    const isBetween = (curMinutes >= morningMinutes && curMinutes < fallbackSunset);
+                    targetTheme = isBetween ? 'light' : 'dark';
+                    diagnosticInfo = `(Data Pending/Missing - Fallback 17:30 used)`;
+                }
+
+                if (settings.theme !== targetTheme) {
+                    console.log(`[AutoTheme] ${currentTimeStr} -> ${targetTheme} ${diagnosticInfo}`);
+                    updateSettings({ theme: targetTheme });
                 }
             }
         };
 
         refresh(); // Immediate check
-        const interval = setInterval(refresh, 60000); // Subsequent checks
-        return () => clearInterval(interval);
+        const interval = setInterval(refresh, 60000); // Check every minute
+
+        // Trigger refresh on focus or visibility change (helps detect OS-level time/timezone jumps)
+        window.addEventListener('focus', refresh);
+        document.addEventListener('visibilitychange', refresh);
+
+        return () => {
+            clearInterval(interval);
+            window.removeEventListener('focus', refresh);
+            document.removeEventListener('visibilitychange', refresh);
+        };
     }, [today, settings.autoTheme, settings.theme, location, sunsetMap]);
 
     const toggleView = () => setViewMode(prev => prev === 'month' ? 'week' : 'month');
