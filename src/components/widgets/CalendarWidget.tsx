@@ -53,10 +53,10 @@ export const CalendarWidget: React.FC = () => {
             ]);
             setJewishHolidays(jHolidays);
             setMuslimHolidays(mHolidays);
-            setSunsetMap(sunsets);
+            if (sunsets.size > 0) setSunsetMap(sunsets);
         };
         loadData();
-    }, []);
+    }, [location, settings.activeCalendars]);
 
     // Load National Holidays when country changes
     useEffect(() => {
@@ -119,7 +119,7 @@ export const CalendarWidget: React.FC = () => {
                 </div>
 
                 {/* Grid */}
-                <div className={`grid grid-cols-7 gap-4 flex-grow ${viewMode === 'week' ? 'grid-rows-1' : 'grid-rows-5'}`}>
+                <div className={`grid grid-cols-7 gap-4 flex-grow ${viewMode === 'week' ? 'grid-rows-1' : `grid-rows-${calendarDays.length / 7}`}`}>
                     {calendarDays.map((day) => {
                         const isCurrentMonth = viewMode === 'week' ? true : isSameMonth(day, monthStart);
                         const isDayToday = isToday(day);
@@ -138,6 +138,7 @@ export const CalendarWidget: React.FC = () => {
                         const calendarData: { type: 'jewish' | 'muslim' | 'national', dayStr: string, holiday?: string, style: string, corner: string }[] = [];
 
                         // 1. Jewish Calendar
+                        const isIsrael = settings.country === 'Israel';
                         let shabbatTime = '';
                         let isOfficial = false;
 
@@ -146,14 +147,34 @@ export const CalendarWidget: React.FC = () => {
                             const jDayStr = hdate.renderGematriya().split(' ')[0].replace(/'/g, '');
                             const isRoshChodesh = hdate.getDate() === 1;
 
-                            const jMatch = jewishHolidays.find(h => h.month === hdate.getMonthName() && h.day === hdate.getDate());
+                            let jMatch = jewishHolidays.find(h => h.month === hdate.getMonthName() && h.day === hdate.getDate());
                             let jName = '';
 
                             if (jMatch) {
-                                isOfficial = jMatch.official;
-                                if (jMatch.names) jName = jMatch.names[settings.language] || jMatch.names['en'] || '';
-                                else jName = (jMatch as any).nameEn || '';
-                            } else if (isRoshChodesh) {
+                                // Regional Handling: Skip Diaspora-only second days if in Israel
+                                const isDiasporaOnly = ['Passover 2', 'Passover 8', 'Shavuot 2', 'Sukkot 2', 'Simchat Torah'].includes(jMatch.names['en']) &&
+                                    !(isIsrael && jMatch.names['en'] === 'Sukkot 2');
+
+                                // Special case: Simchat Torah in Diaspora is Tishrei 23, but in Israel it's Tishrei 22 (merged with Shemini Atzeret)
+                                if (isIsrael && jMatch.names['en'] === 'Simchat Torah' && hdate.getMonthName() === 'Tishrei' && hdate.getDate() === 23) {
+                                    jMatch = undefined; // Don't show Diaspora Simchat Torah in Israel
+                                } else if (isIsrael && jMatch.names['en'] === 'Shemini Atzeret' && hdate.getMonthName() === 'Tishrei' && hdate.getDate() === 22) {
+                                    // It's both in Israel
+                                    isOfficial = true;
+                                    jName = settings.language === 'he' ? 'שמיני עצרת ושימחת תורה' : 'Shemini Atzeret & Simchat Torah';
+                                } else if (isIsrael && isDiasporaOnly) {
+                                    jMatch = undefined; // Skip the second day
+                                }
+
+                                if (jMatch) {
+                                    isOfficial = jMatch.official || isOfficial;
+                                    if (!jName) {
+                                        jName = jMatch.names[settings.language] || jMatch.names['en'] || (jMatch as any).nameEn || '';
+                                    }
+                                }
+                            }
+
+                            if (!jMatch && isRoshChodesh) {
                                 if (settings.language === 'ru') jName = 'Рош Ходеш';
                                 else if (settings.language === 'he') jName = 'ראש חודש';
                                 else jName = 'Rosh Chodesh';
@@ -239,13 +260,56 @@ export const CalendarWidget: React.FC = () => {
                             calendarData.push({
                                 dayStr: '',
                                 holiday: nMatch.names[settings.language] || nMatch.names['en'] || nMatch.name,
-                                style: 'text-purple-500 font-bold',
+                                style: 'text-purple-400 font-bold',
                                 corner: ''
                             } as any);
                         }
 
-                        // Combine Holidays for bottom display
-                        const allHolidays = calendarData.filter(c => c.holiday).map(c => c.holiday);
+                        // Combine Holidays for bottom display and deduplicate
+                        const holidayNames = calendarData
+                            .filter((c): c is typeof c & { holiday: string } => !!c.holiday)
+                            .map(c => c.holiday.trim());
+
+                        const allHolidays: string[] = [];
+                        const seenCanonical = new Set<string>();
+
+                        const getCanonical = (name: string) => {
+                            const low = name.toLowerCase();
+                            if (low.includes('independence day') || low.includes('haatzmaut')) return 'independence_day';
+                            if (low.includes('shoah') || low.includes('holocaust')) return 'yom_hashoah';
+                            if (low.includes('zikaron') || low.includes('memorial day')) return 'yom_hazikaron';
+                            if (low.includes('rosh hashanah')) return 'rosh_hashanah';
+                            if (low.includes('yom kippur')) return 'yom_kippur';
+                            if (low.includes('shavuot')) return 'shavuot';
+                            if (low.includes('sukkot')) return 'sukkot';
+                            if (low.includes('passover') || low.includes('pesach')) return 'passover';
+                            if (low.includes('simchat torah')) return 'simchat_torah';
+                            if (low.includes('shemini atzeret')) return 'shemini_atzeret';
+                            if (low.includes('hanukkah') || low.includes('chanukah')) return 'hanukkah';
+                            if (low.includes('purim')) return 'purim';
+                            // Hebrew equivalents for the Set
+                            if (name === 'יום העצמאות') return 'independence_day';
+                            if (name === 'יום השואה') return 'yom_hashoah';
+                            if (name === 'יום הזיכרון') return 'yom_hazikaron';
+                            if (name.includes('ראש השנה')) return 'rosh_hashanah';
+                            if (name === 'יום כיפור') return 'yom_kippur';
+                            if (name.includes('שבועות')) return 'shavuot';
+                            if (name.includes('סוכות')) return 'sukkot';
+                            if (name.includes('פסח')) return 'passover';
+                            if (name === 'שמחת תורה') return 'simchat_torah';
+                            if (name === 'שמיני עצרת') return 'shemini_atzeret';
+                            if (name.includes('חנוכה')) return 'hanukkah';
+                            if (name.includes('פורים')) return 'purim';
+                            return low;
+                        };
+
+                        holidayNames.forEach(name => {
+                            const canonical = getCanonical(name);
+                            if (!seenCanonical.has(canonical)) {
+                                seenCanonical.add(canonical);
+                                allHolidays.push(name);
+                            }
+                        });
 
 
                         return (
@@ -264,7 +328,7 @@ export const CalendarWidget: React.FC = () => {
                                   ${isOfficial ? 'ring-1 ring-yellow-500/50' : ''} 
                                 `}
                             >
-                                <span className={`font-bold mb-auto ${SIZE_MAP[settings.dayNumberSize]} ${isDayToday ? 'text-primary' : shouldHighlightWeekend ? 'text-red-600 dark:text-red-400' : 'text-text-main'}`}>
+                                <span className={`font-bold mb-auto ${SIZE_MAP[settings.dayNumberSize]} ${isDayToday ? 'text-primary' : (isOfficial || shouldHighlightWeekend) ? 'text-red-600 dark:text-red-400' : 'text-text-main'}`}>
                                     {format(day, 'd')}
                                 </span>
 
@@ -278,7 +342,7 @@ export const CalendarWidget: React.FC = () => {
                                 {/* Holidays & Times (Bottom Center) */}
                                 <div className="absolute bottom-1 left-0 right-0 flex flex-col items-center justify-end pointer-events-none gap-0.5">
                                     {allHolidays.slice(0, 2).map((h, i) => (
-                                        <div key={i} className="text-[10px] font-semibold text-center text-primary/80 leading-tight w-full truncate px-1">
+                                        <div key={i} className="text-[10px] font-semibold text-center text-sky-400 leading-tight w-full truncate px-1">
                                             {h}
                                         </div>
                                     ))}

@@ -12,11 +12,13 @@ export interface CountryInfo {
     languageCode: string;
     filename: string;
     calendarType: 'gregorian' | 'jewish' | 'muslim';
+    lat?: number;
+    long?: number;
 }
 
 export const fetchCountryList = async (): Promise<CountryInfo[]> => {
     try {
-        const response = await fetch('/UtilityFiles/CountryData.csv');
+        const response = await fetch('UtilityFiles/CountryData.csv');
         if (!response.ok) return [];
         const text = await response.text();
 
@@ -27,13 +29,15 @@ export const fetchCountryList = async (): Promise<CountryInfo[]> => {
         const startIndex = lines[0].startsWith('Country') ? 1 : 0;
 
         for (let i = startIndex; i < lines.length; i++) {
-            const [country, languageCode, filename, calendarType] = lines[i].split(',').map(s => s.trim());
+            const [country, languageCode, filename, calendarType, lat, long] = lines[i].split(',').map(s => s.trim());
             if (country && filename) {
                 countries.push({
                     country,
                     languageCode: languageCode || 'en',
                     filename,
-                    calendarType: (calendarType as any) || 'gregorian'
+                    calendarType: (calendarType as any) || 'gregorian',
+                    lat: lat ? parseFloat(lat) : undefined,
+                    long: long ? parseFloat(long) : undefined
                 });
             }
         }
@@ -48,7 +52,7 @@ export const fetchCountryList = async (): Promise<CountryInfo[]> => {
 
 export const fetchNationalHolidays = async (filename: string): Promise<NationalHoliday[]> => {
     try {
-        const response = await fetch(`/UtilityFiles/NationalHolidays/${filename}`);
+        const response = await fetch(`UtilityFiles/NationalHolidays/${filename}`);
         if (!response.ok) return [];
         const text = await response.text();
 

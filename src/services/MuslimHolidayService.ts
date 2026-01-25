@@ -8,7 +8,7 @@ export interface MuslimHoliday {
 
 export const fetchMuslimHolidays = async (): Promise<MuslimHoliday[]> => {
     try {
-        const response = await fetch('/UtilityFiles/MuslimSpecialDays.csv?t=' + Date.now());
+        const response = await fetch('UtilityFiles/MuslimSpecialDays.csv?t=' + Date.now());
         const text = await response.text();
         return parseCSV(text);
     } catch (error) {

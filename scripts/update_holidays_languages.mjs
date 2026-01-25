@@ -19,6 +19,8 @@ const HOLIDAYS = [
     { month: 'Nisan', day: 21, type: 'holiday', official: true, name: 'Passover 7' },
     { month: 'Nisan', day: 22, type: 'holiday', official: true, name: 'Passover 8' },
     { month: 'Iyyar', day: 5, type: 'minor', official: false, name: 'Yom HaAtzmaut' },
+    { month: 'Nisan', day: 27, type: 'minor', official: false, name: 'Yom HaShoah' },
+    { month: 'Iyyar', day: 4, type: 'minor', official: false, name: 'Yom HaZikaron' },
     { month: 'Sivan', day: 6, type: 'holiday', official: true, name: 'Shavuot 1' },
     { month: 'Sivan', day: 7, type: 'holiday', official: true, name: 'Shavuot 2' },
     { month: 'Tishrei', day: 1, type: 'holiday', official: true, name: 'Rosh Hashanah 1' },
@@ -26,12 +28,24 @@ const HOLIDAYS = [
     { month: 'Tishrei', day: 10, type: 'holiday', official: true, name: 'Yom Kippur' },
     { month: 'Tishrei', day: 15, type: 'holiday', official: true, name: 'Sukkot 1' },
     { month: 'Tishrei', day: 16, type: 'holiday', official: true, name: 'Sukkot 2' },
+    { month: 'Tishrei', day: 21, type: 'chol_hamoed', official: false, name: 'Hoshana Raba' },
     { month: 'Tishrei', day: 22, type: 'holiday', official: true, name: 'Shemini Atzeret' },
     { month: 'Tishrei', day: 23, type: 'holiday', official: true, name: 'Simchat Torah' },
     { month: 'Kislev', day: 25, type: 'minor', official: false, name: 'Hanukkah 1' },
+    { month: 'Kislev', day: 26, type: 'minor', official: false, name: 'Hanukkah 2' },
+    { month: 'Kislev', day: 27, type: 'minor', official: false, name: 'Hanukkah 3' },
+    { month: 'Kislev', day: 28, type: 'minor', official: false, name: 'Hanukkah 4' },
+    { month: 'Kislev', day: 29, type: 'minor', official: false, name: 'Hanukkah 5' },
+    { month: 'Kislev', day: 30, type: 'minor', official: false, name: 'Hanukkah 6' },
+    { month: 'Tevet', day: 1, type: 'minor', official: false, name: 'Hanukkah 7' },
+    { month: 'Tevet', day: 2, type: 'minor', official: false, name: 'Hanukkah 8' },
+    { month: 'Teves', day: 1, type: 'minor', official: false, name: 'Hanukkah 7' },
+    { month: 'Teves', day: 2, type: 'minor', official: false, name: 'Hanukkah 8' },
     { month: 'Adar', day: 14, type: 'minor', official: false, name: 'Purim' },
+    { month: 'Adar', day: 15, type: 'minor', official: false, name: 'Shushan Purim' },
     { month: 'Adar I', day: 14, type: 'minor', official: false, name: 'Purim Katan' },
     { month: 'Adar II', day: 14, type: 'minor', official: false, name: 'Purim' },
+    { month: 'Adar II', day: 15, type: 'minor', official: false, name: 'Shushan Purim' },
     { month: 'Av', day: 9, type: 'fast', official: false, name: 'Tisha B\'Av' },
     { month: 'Tishrei', day: 3, type: 'fast', official: false, name: 'Fast of Gedaliah' },
     { month: 'Tevet', day: 10, type: 'fast', official: false, name: 'Asara B\'Tevet' },
@@ -75,6 +89,27 @@ const TRANSLATIONS = {
     'Tisha B\'Av': {
         en: 'Tisha B\'Av', ru: '9 Ава', he: 'תשעה באב', es: 'Tisha b\'Av', fr: 'Tisha Beav', de: 'Tisch’a beAv',
         uk: '9 Ава', pl: 'Tisza be-Aw', it: 'Tisha BeAv'
+    },
+    'Yom HaAtzmaut': {
+        en: 'Yom HaAtzmaut', he: 'יום העצמאות', ru: 'День Независимости', es: 'Día de la Independencia', fr: 'Jour de l\'Indépendance'
+    },
+    'Yom HaShoah': {
+        en: 'Yom HaShoah', he: 'יום השואה', ru: 'День памяти жертв Холокоста'
+    },
+    'Yom HaZikaron': {
+        en: 'Yom HaZikaron', he: 'יום הזיכרון', ru: 'День памяти павших'
+    },
+    'Simchat Torah': {
+        en: 'Simchat Torah', he: 'שמחת תורה', ru: 'Симхат Тора', es: 'Simjat Torá', fr: 'Sim\'hat Torah'
+    },
+    'Shemini Atzeret': {
+        en: 'Shemini Atzeret', he: 'שמיני עצרת', ru: 'Шмини Ацерет', es: 'Shemini Atzeret', fr: 'Chemini Atseret'
+    },
+    'Hanukkah': {
+        en: 'Hanukkah', he: 'חנוכה', ru: 'Хаנוка', es: 'Janucá', fr: 'Hanoucca'
+    },
+    'Shushan Purim': {
+        en: 'Shushan Purim', he: 'שושן פורים', ru: 'Шушан Пурим'
     }
 };
 

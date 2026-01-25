@@ -22,7 +22,7 @@ let categoryConfigs: CategoryConfig[] = [];
 // Fetch config once
 export const loadImageCategories = async () => {
     try {
-        const response = await fetch('/UtilityFiles/ImageCategory.json');
+        const response = await fetch('UtilityFiles/ImageCategory.json');
         if (response.ok) {
             categoryConfigs = await response.json();
         }

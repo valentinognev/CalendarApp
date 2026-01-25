@@ -22,26 +22,26 @@ export const MediaPanel: React.FC = () => {
 
     // Rotation Logic
     useEffect(() => {
+        // In Lite Mode, we do NOT rotate images to save resources
+        if (settings.performanceMode === 'lite') return;
+
         // Immediate update if source/categories change (optional, but good UX)
-        // setCurrentImage(getNextImage(settings)); 
-        // actually, let's just let the timer handle it OR trigger on change.
-        // If user changes category, they want to see result immediately.
+        // ...
         const newImg = getNextImage(settings);
         if (newImg) setCurrentImage(newImg);
 
         const ms = settings.imageChangeFrequency || 3600000; // Default 1h
 
         const interval = setInterval(() => {
-            // Fade out effect could be added here
             setFade(true);
             setTimeout(() => {
                 setCurrentImage(getNextImage(settings));
                 setFade(false);
-            }, 500); // Wait for fade out
+            }, 500);
         }, ms);
 
         return () => clearInterval(interval);
-    }, [settings.imageCategories, settings.imageSource, settings.imageChangeFrequency, settings.localImagePath]);
+    }, [settings.imageCategories, settings.imageSource, settings.imageChangeFrequency, settings.localImagePath, settings.performanceMode]);
 
     return (
         <div className="w-full h-full relative bg-slate-900 overflow-hidden">
@@ -49,7 +49,7 @@ export const MediaPanel: React.FC = () => {
                 <img
                     src={currentImage}
                     alt="Background"
-                    className={`w-full h-full object-cover transition-opacity duration-1000 ${fade ? 'opacity-0' : 'opacity-100'} filter brightness-[0.75]`}
+                    className={`w-full h-full object-cover ${settings.performanceMode === 'lite' ? '' : `transition-opacity duration-1000 ${fade ? 'opacity-0' : 'opacity-100'}`} filter brightness-[0.75]`}
                 />
             ) : (
                 <div className="w-full h-full flex items-center justify-center text-slate-600">

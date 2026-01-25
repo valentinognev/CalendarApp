@@ -1,13 +1,13 @@
-Country,LanguageCode,HolidayFile,CalendarType
-United States,en-USA,USA.csv,gregorian
-United Kingdom,en-USA,UK.csv,gregorian
-Israel,he-ISR,Israel.csv,jewish
-France,fr-FRA,France.csv,gregorian
-Germany,de-DEU,Germany.csv,gregorian
-Spain,es-ESP,Spain.csv,gregorian
-Russia,ru-RUS,Russia.csv,gregorian
-China,zh-CHN,China.csv,gregorian
-India,hi-IND,India.csv,gregorian
+Country,LanguageCode,HolidayFile,CalendarType,Lat,Long
+United States,en-USA,USA.csv,gregorian,37.0902,-95.7129
+United Kingdom,en-USA,UK.csv,gregorian,55.3781,-3.436
+Israel,he-ISR,Israel.csv,jewish,31.0461,34.8516
+France,fr-FRA,France.csv,gregorian,46.2276,2.2137
+Germany,de-DEU,Germany.csv,gregorian,51.1657,10.4515
+Spain,es-ESP,Spain.csv,gregorian,40.4637,-3.7492
+Russia,ru-RUS,Russia.csv,gregorian,61.524,105.3188
+China,zh-CHN,China.csv,gregorian,35.8617,104.1954
+India,hi-IND,India.csv,gregorian,20.5937,78.9629
 Japan,ja-JPN,Japan.csv,gregorian
 Italy,it-ITA,Italy.csv,gregorian
 Brazil,pt-PRT,Brazil.csv,gregorian

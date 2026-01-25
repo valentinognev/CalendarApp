@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAppStore, type Language, type Size, type Alignment, IMAGE_CATEGORIES, type CustomTheme } from '../../store/AppContext';
-import { X, Moon, Sun, Globe, Layout, Palette, Image as ImageIcon, Folder, Clock } from 'lucide-react';
+import { X, Moon, Sun, Globe, Layout, Palette, Image as ImageIcon, Folder, Clock, Zap, MapPin, Navigation, RotateCcw, Search, Activity } from 'lucide-react';
+import { searchLocation } from '../../services/geocodingService';
 
 import { TRANSLATIONS } from '../../utils/translations';
 import { fetchCountryList, type CountryInfo } from '../../services/NationalHolidayService';
@@ -83,6 +84,8 @@ const ColorInput: React.FC<{ label: string, value: string, onChange: (val: strin
 export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose }) => {
     const { settings, updateSettings } = useAppStore();
     const [countries, setCountries] = useState<CountryInfo[]>([]);
+    const [isSearching, setIsSearching] = useState(false);
+    const [searchError, setSearchError] = useState<string | null>(null);
     const [activeTab, setActiveTab] = useState<Tab>('general');
 
     useEffect(() => {
@@ -197,7 +200,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
                                         <div className="space-y-3">
                                             <label className="text-slate-300 text-sm font-medium">{t.language}</label>
                                             <select
-                                                className="w-full bg-slate-800 border border-slate-700 text-white rounded-xl px-4 py-3 outline-none focus:border-sky-500"
+                                                className="w-full bg-slate-800 border border-slate-700 text-white rounded-xl px-4 py-3 outline-none focus:border-sky-500 appearance-none"
                                                 value={settings.language}
                                                 onChange={(e) => updateSettings({ language: e.target.value as Language })}
                                             >
@@ -220,10 +223,188 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
                                                 ))}
                                             </select>
                                         </div>
+
+                                        <div className="space-y-3">
+                                            <label className="text-slate-300 text-sm font-medium">{t.startWeek}</label>
+                                            <div className="flex gap-2">
+                                                <button onClick={() => updateSettings({ weekStart: 0 })}
+                                                    className={`flex-1 py-3 border rounded-xl text-sm font-medium transition-all ${settings.weekStart === 0 ? 'bg-sky-900/40 border-sky-500 text-sky-400' : 'border-slate-700 text-slate-400 hover:bg-slate-800'}`}>
+                                                    {t.sunday}
+                                                </button>
+                                                <button onClick={() => updateSettings({ weekStart: 1 })}
+                                                    className={`flex-1 py-3 border rounded-xl text-sm font-medium transition-all ${settings.weekStart === 1 ? 'bg-sky-900/40 border-sky-500 text-sky-400' : 'border-slate-700 text-slate-400 hover:bg-slate-800'}`}>
+                                                    {t.monday}
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        <div className="space-y-3">
+                                            <label className="text-slate-300 text-sm font-medium">Time Format</label>
+                                            <div className="flex gap-2">
+                                                <button onClick={() => updateSettings({ timeFormat: '12' })}
+                                                    className={`flex-1 py-3 border rounded-xl text-sm font-medium transition-all ${settings.timeFormat === '12' ? 'bg-sky-900/40 border-sky-500 text-sky-400' : 'border-slate-700 text-slate-400 hover:bg-slate-800'}`}>
+                                                    12h
+                                                </button>
+                                                <button onClick={() => updateSettings({ timeFormat: '24' })}
+                                                    className={`flex-1 py-3 border rounded-xl text-sm font-medium transition-all ${settings.timeFormat === '24' ? 'bg-sky-900/40 border-sky-500 text-sky-400' : 'border-slate-700 text-slate-400 hover:bg-slate-800'}`}>
+                                                    24h
+                                                </button>
+                                            </div>
+                                        </div>
                                     </div>
 
-                                    {/* Calendars */}
                                     <div className="space-y-3">
+                                        <label className="text-slate-300 text-sm font-medium">{t.highlightWeekends}</label>
+                                        <div className="grid grid-cols-3 gap-3">
+                                            {[
+                                                { id: 'none', label: t.weekendNone },
+                                                { id: 'fri', label: t.weekendFri },
+                                                { id: 'sat', label: t.weekendSat },
+                                                { id: 'sun', label: t.weekendSun },
+                                                { id: 'fri-sat', label: t.weekendFriSat },
+                                                { id: 'both', label: t.weekendBoth }
+                                            ].map(opt => (
+                                                <button
+                                                    key={opt.id}
+                                                    onClick={() => updateSettings({ highlightWeekend: opt.id as any })}
+                                                    className={`py-2 px-3 border rounded-xl text-xs font-medium transition-all ${settings.highlightWeekend === opt.id ? 'bg-sky-900/40 border-sky-500 text-sky-400' : 'border-slate-700 text-slate-400 hover:bg-slate-800'}`}
+                                                >
+                                                    {opt.label}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    {/* Location Settings */}
+                                    {settings.activeCalendars.includes('jewish') && (
+                                        <div className="space-y-4 pt-6 mt-6 border-t border-slate-700/50 animate-in fade-in slide-in-from-top-4 duration-500">
+                                            <div className="flex items-center justify-between">
+                                                <div className="flex items-center gap-2">
+                                                    <MapPin size={18} className="text-sky-400" />
+                                                    <div>
+                                                        <h3 className="text-slate-200 text-sm font-semibold tracking-wide">Location Settings</h3>
+                                                        <p className="text-[10px] text-slate-500 font-medium">For Shabbat Candle Lighting & Havdalah</p>
+                                                    </div>
+                                                </div>
+                                                <button
+                                                    onClick={() => updateSettings({ manualLocation: !settings.manualLocation })}
+                                                    dir="ltr"
+                                                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${settings.manualLocation ? 'bg-sky-500' : 'bg-slate-700'}`}
+                                                >
+                                                    <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${settings.manualLocation ? 'translate-x-6' : 'translate-x-1'}`} />
+                                                </button>
+                                            </div>
+
+                                            <div className={`space-y-4 transition-all duration-300 ${settings.manualLocation ? 'opacity-100 scale-100' : 'opacity-40 scale-95 pointer-events-none'}`}>
+                                                <div className="grid grid-cols-2 gap-4">
+                                                    <div className="space-y-1.5">
+                                                        <label className="text-[10px] text-slate-400 font-bold uppercase tracking-wider ml-1">City</label>
+                                                        <input
+                                                            type="text"
+                                                            value={settings.manualCity}
+                                                            onChange={(e) => updateSettings({ manualCity: e.target.value })}
+                                                            placeholder="e.g. Jerusalem"
+                                                            className="w-full bg-slate-800/80 border border-slate-700 rounded-xl px-4 py-2 text-white text-sm outline-none focus:border-sky-500 focus:bg-slate-800 transition-all"
+                                                        />
+                                                    </div>
+                                                    <div className="space-y-1.5">
+                                                        <label className="text-[10px] text-slate-400 font-bold uppercase tracking-wider ml-1">Country</label>
+                                                        <input
+                                                            type="text"
+                                                            value={settings.manualCountry}
+                                                            onChange={(e) => updateSettings({ manualCountry: e.target.value })}
+                                                            placeholder="e.g. Israel"
+                                                            className="w-full bg-slate-800/80 border border-slate-700 rounded-xl px-4 py-2 text-white text-sm outline-none focus:border-sky-500 focus:bg-slate-800 transition-all"
+                                                        />
+                                                    </div>
+                                                </div>
+
+                                                <button
+                                                    onClick={async () => {
+                                                        setIsSearching(true);
+                                                        setSearchError(null);
+                                                        const result = await searchLocation(settings.manualCity, settings.manualCountry);
+                                                        setIsSearching(false);
+                                                        if (result) {
+                                                            updateSettings({
+                                                                lat: result.lat,
+                                                                long: result.long,
+                                                                manualLocation: true
+                                                            });
+                                                        } else {
+                                                            setSearchError("Location not found or connection error");
+                                                        }
+                                                    }}
+                                                    disabled={isSearching || (!settings.manualCity && !settings.manualCountry)}
+                                                    className="w-full flex items-center justify-center gap-2 py-2.5 bg-sky-500 hover:bg-sky-400 disabled:bg-slate-700 text-white rounded-xl font-semibold transition-all shadow-lg shadow-sky-500/10 active:scale-95"
+                                                >
+                                                    {isSearching ? <Activity size={16} className="animate-spin" /> : <Search size={16} />}
+                                                    {isSearching ? 'Searching...' : 'Search Online for Coordinates'}
+                                                </button>
+
+                                                {searchError && (
+                                                    <p className="text-[10px] text-rose-400 text-center font-medium animate-bounce">{searchError}</p>
+                                                )}
+
+                                                <div className="flex items-center gap-3 py-2">
+                                                    <div className="h-px flex-1 bg-slate-700/50"></div>
+                                                    <span className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">or manual coordinates</span>
+                                                    <div className="h-px flex-1 bg-slate-700/50"></div>
+                                                </div>
+
+                                                <div className="grid grid-cols-2 gap-4">
+                                                    <div className="space-y-1.5">
+                                                        <label className="text-[10px] text-slate-400 font-bold uppercase tracking-wider ml-1">Latitude</label>
+                                                        <input
+                                                            type="number"
+                                                            value={settings.lat}
+                                                            onChange={(e) => updateSettings({ lat: parseFloat(e.target.value) })}
+                                                            step="0.0001"
+                                                            className="w-full bg-slate-800/80 border border-slate-700 rounded-xl px-4 py-2 text-white text-sm outline-none focus:border-sky-500 focus:bg-slate-800 transition-all font-mono"
+                                                        />
+                                                    </div>
+                                                    <div className="space-y-1.5">
+                                                        <label className="text-[10px] text-slate-400 font-bold uppercase tracking-wider ml-1">Longitude</label>
+                                                        <input
+                                                            type="number"
+                                                            value={settings.long}
+                                                            onChange={(e) => updateSettings({ long: parseFloat(e.target.value) })}
+                                                            step="0.0001"
+                                                            className="w-full bg-slate-800/80 border border-slate-700 rounded-xl px-4 py-2 text-white text-sm outline-none focus:border-sky-500 focus:bg-slate-800 transition-all font-mono"
+                                                        />
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {!settings.manualLocation && (
+                                                <div className="flex items-start gap-2 bg-sky-500/5 border border-sky-500/10 p-3 rounded-xl">
+                                                    <Navigation size={14} className="text-sky-400 mt-0.5 shrink-0" />
+                                                    <p className="text-xs text-slate-400 leading-relaxed">
+                                                        Using <strong>automatic detection</strong>. If Shabbat times look incorrect for your city, toggle "Manual" above.
+                                                    </p>
+                                                </div>
+                                            )}
+
+                                            <button
+                                                onClick={() => {
+                                                    const countryInfo = countries.find(c => c.country === settings.country);
+                                                    if (countryInfo && countryInfo.lat !== undefined && countryInfo.long !== undefined) {
+                                                        updateSettings({
+                                                            lat: countryInfo.lat,
+                                                            long: countryInfo.long,
+                                                            manualLocation: true
+                                                        });
+                                                    }
+                                                }}
+                                                className="inline-flex items-center gap-2 text-xs font-semibold text-sky-400 hover:text-sky-300 transition-colors bg-sky-500/5 hover:bg-sky-500/10 px-3 py-2 rounded-lg border border-sky-500/10 active:scale-95"
+                                            >
+                                                <RotateCcw size={12} /> Reset to defaults for {settings.country}
+                                            </button>
+                                        </div>
+                                    )}
+
+                                    {/* Calendars */}
+                                    <div className="space-y-3 pt-6 border-t border-slate-700/50">
                                         <label className="text-slate-300 text-sm font-medium">{t.activeCalendars}</label>
                                         <div className="grid grid-cols-2 gap-4">
                                             {[
@@ -277,6 +458,30 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
                                         >
                                             <Sun size={18} /> Light
                                         </button>
+                                    </div>
+                                </section>
+
+                                {/* Performance Mode (Lite) */}
+                                <section className="space-y-6">
+                                    <h3 className="text-sky-400 font-semibold uppercase tracking-wider text-sm flex items-center gap-2">
+                                        <Zap size={16} /> {t.performanceTitle || 'Performance'}
+                                    </h3>
+                                    <div className="bg-slate-800/50 p-6 rounded-2xl border border-slate-700/50 flex flex-col gap-4">
+                                        <div className="flex justify-between items-center">
+                                            <div>
+                                                <div className="font-medium text-slate-200">{t.performanceLite || 'Lite Mode'}</div>
+                                                <div className="text-xs text-slate-500 mt-1 max-w-sm">
+                                                    {t.performanceDesc || 'Reduces visual effects (blur, animations) for smoother performance on slower devices.'}
+                                                </div>
+                                            </div>
+                                            <button
+                                                onClick={() => updateSettings({ performanceMode: settings.performanceMode === 'lite' ? 'high' : 'lite' })}
+                                                dir="ltr"
+                                                className={`relative inline-flex h-8 w-14 items-center rounded-full transition-colors ${settings.performanceMode === 'lite' ? 'bg-sky-500' : 'bg-slate-700'}`}
+                                            >
+                                                <span className={`inline-block h-6 w-6 transform rounded-full bg-white transition-transform ${settings.performanceMode === 'lite' ? 'translate-x-7' : 'translate-x-1'}`} />
+                                            </button>
+                                        </div>
                                     </div>
                                 </section>
 
@@ -359,6 +564,30 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
                                                 ))}
                                             </div>
                                         </div>
+
+                                        <div className="space-y-3">
+                                            <label className="text-slate-300 text-sm font-medium">{t.dayNameSize}</label>
+                                            <div className="flex gap-2">
+                                                {(['sm', 'md', 'lg'] as Size[]).map(s => (
+                                                    <button key={s} onClick={() => updateSettings({ dayNameSize: s })}
+                                                        className={`flex-1 py-2 border rounded-lg uppercase text-xs font-bold ${settings.dayNameSize === s ? 'bg-sky-900 border-sky-500 text-sky-400' : 'border-slate-700 text-slate-500'}`}>
+                                                        {t[s]}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </div>
+
+                                        <div className="space-y-3">
+                                            <label className="text-slate-300 text-sm font-medium">{t.dayNameAlign}</label>
+                                            <div className="flex gap-2">
+                                                {(['left', 'center', 'right'] as Alignment[]).map(a => (
+                                                    <button key={a} onClick={() => updateSettings({ dayNameAlign: a })}
+                                                        className={`flex-1 py-2 border rounded-lg uppercase text-xs font-bold ${settings.dayNameAlign === a ? 'bg-sky-900 border-sky-500 text-sky-400' : 'border-slate-700 text-slate-500'}`}>
+                                                        {t[a]}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </div>
                                     </div>
                                 </section>
                             </div>
@@ -423,7 +652,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
                                                     type="text"
                                                     value={settings.localImagePath || ''}
                                                     onChange={(e) => updateSettings({ localImagePath: e.target.value })}
-                                                    placeholder="/home/user/pictures..."
+                                                    placeholder="pictures/my-images..."
                                                     className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 pl-11 text-slate-200 outline-none focus:border-sky-500"
                                                 />
                                                 <Folder className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={18} />

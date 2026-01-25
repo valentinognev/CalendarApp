@@ -8,7 +8,7 @@ export interface JewishHoliday {
 
 export const fetchJewishHolidays = async (): Promise<JewishHoliday[]> => {
     try {
-        const response = await fetch('/UtilityFiles/JewishSpecialDays.csv?t=' + Date.now());
+        const response = await fetch('UtilityFiles/JewishSpecialDays.csv?t=' + Date.now());
         const text = await response.text();
         return parseCSV(text);
     } catch (error) {

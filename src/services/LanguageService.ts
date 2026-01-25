@@ -19,7 +19,7 @@ export const fetchLanguageDefaults = async (): Promise<Record<string, LanguageDe
 
     isFetching = true;
     try {
-        const response = await fetch('/UtilityFiles/LanguageDefaults.csv?t=' + Date.now());
+        const response = await fetch('UtilityFiles/LanguageDefaults.csv?t=' + Date.now());
         const text = await response.text();
         languageCache = parseCSV(text);
 

@@ -68,6 +68,12 @@ The application uses a hybrid approach for Jewish holidays:
 │   └── App.tsx             # Entry point & Main Header Logic
 ```
 
+```
+
+### 5. Deployment & Portability
+- **Relative Paths**: All resource fetching (CSVs, JSONs) use relative paths. This allows the application to be deployed in subdirectories (e.g., `https://example.com/calendar/`) or moved between different machines without any configuration changes.
+- **Portability**: To deploy on a new machine, simply clone the repository, run `npm install`, and `npm run build` or `npm run dev`.
+
 ## 🚀 How to Run
 ```bash
 npm install
@@ -81,4 +87,6 @@ npm run dev
 1.  **Holiday Updates**: Always check `public/UtilityFiles/JewishSpecialDays.csv` before modifying code for holiday names or dates.
 2.  **RTL Logic**: When adding UI components, ensure you strictly use logical specificers (start/end) where possible, or check `settings.language === 'he'` for manual flips.
 3.  **State**: `AppContext` is the central brain. If you need to add global settings, add them to `Metrics` or `Settings` interfaces there.
+4.  **Lite Mode**: For low-end devices (Raspberry Pi, Radxa), start the URL with `?lite=true` to force Performance Mode on startup.
+    - Example: `http://localhost:5173/?lite=true`
 

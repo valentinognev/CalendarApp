@@ -63,24 +63,38 @@ export const translations = {
         he: "עיד אל-אדחא", tr: "Kurban Bayramı", id: "Idul Adha", ms: "Hari Raya Aidiladha", fa: "عید قربان", ur: "عید الاضحی",
         bn: "ঈদুল আযহা"
     },
-    "Passover": {
-        he: "פסח", fr: "Pâque", es: "Pascua", ru: "Песах", de: "Pessach", en: "Passover"
-    },
-    "Rosh Hashanah": {
-        he: "ראש השנה", fr: "Rosh Hashana", es: "Rosh Hashaná", ru: "Рош ха-Шана", de: "Rosch ha-Schana", en: "Rosh Hashanah"
-    },
-    "Yom Kippur": {
-        he: "יום כיפור", fr: "Yom Kippour", es: "Yom Kipur", ru: "Йом Кипур", de: "Jom Kippur", en: "Yom Kippur"
-    },
-    "Shavuot": {
-        he: "שבועות", fr: "Chavouot", es: "Shavuot", ru: "Шавуот", de: "Schawuot", en: "Shavuot"
-    },
-    "Sukkot": {
-        he: "סוכות", fr: "Souccot", es: "Sucot", ru: "Суккот", de: "Sukkot", en: "Sukkot"
-    },
-    "Simchat Torah": {
-        he: "שמחת תורה", fr: "Sim'hat Torah", es: "Simjat Torá", ru: "Симхат Тора", de: "Simchat Tora", en: "Simchat Torah"
-    },
+    "Passover": { he: "פסח", fr: "Pâque", es: "Pascua", ru: "Песах", de: "Pessach", en: "Passover" },
+    "Passover 1": { he: "פסח 1", fr: "Pessa'h 1", es: "Pésaj 1", ru: "Песах 1", de: "Pessach 1", en: "Passover 1" },
+    "Passover 2": { he: "פסח 2", fr: "Pessa'h 2", es: "Pésaj 2", ru: "Песах 2", de: "Pessach 2", en: "Passover 2" },
+    "Passover 7": { he: "פסח 7", fr: "Pessa'h 7", es: "Pésaj 7", ru: "Песах 7", de: "Pessach 7", en: "Passover 7" },
+    "Passover 8": { he: "פסח 8", fr: "Pessa'h 8", es: "Pésaj 8", ru: "Песах 8", de: "Pessach 8", en: "Passover 8" },
+    "Shavuot": { he: "שבועות", fr: "Chavouot", es: "Shavuot", ru: "Шавуот", de: "Schawuot", en: "Shavuot" },
+    "Shavuot 1": { he: "שבועות 1", fr: "Chavouot 1", es: "Shavuot 1", ru: "Шавуот 1", de: "Schawuot 1", en: "Shavuot 1" },
+    "Shavuot 2": { he: "שבועות 2", fr: "Chavouot 2", es: "Shavuot 2", ru: "Шавуот 2", de: "Schawuot 2", en: "Shavuot 2" },
+    "Rosh Hashanah": { he: "ראש השנה", fr: "Rosh Hashana", es: "Rosh Hashaná", ru: "Рош ха-Шана", de: "Rosch ha-Schana", en: "Rosh Hashanah" },
+    "Rosh Hashanah 1": { he: "ראש השנה 1", fr: "Rosh Hashana 1", es: "Rosh Hashaná 1", ru: "Рош ха-Шана 1", de: "Rosch ha-Schana 1", en: "Rosh Hashanah 1" },
+    "Rosh Hashanah 2": { he: "ראש השנה 2", fr: "Rosh Hashana 2", es: "Rosh Hashaná 2", ru: "Рош ха-Шана 2", de: "Rosch ha-Schana 2", en: "Rosh Hashanah 2" },
+    "Yom Kippur": { he: "יום כיפור", fr: "Yom Kippour", es: "Yom Kipur", ru: "Йом Кипур", de: "Jom Kippur", en: "Yom Kippur" },
+    "Sukkot": { he: "סוכות", fr: "Souccot", es: "Sucot", ru: "Суккот", de: "Sukkot", en: "Sukkot" },
+    "Shemini Atzeret": { he: "שמיני עצרת", fr: "Chemini Atseret", es: "Shemini Atzeret", ru: "Шмини Ацерет", de: "Schemini Azeret", en: "Shemini Atzeret" },
+    "Simchat Torah": { he: "שמחת תורה", fr: "Sim'hat Torah", es: "Simjat Torá", ru: "Симхат Тора", de: "Simchat Tora", en: "Simchat Torah" },
+    "Sukkot 1": { he: "סוכות", fr: "Souccot 1", es: "Sucot 1", ru: "Суккот 1", de: "Sukkot 1", en: "Sukkot 1" },
+    "Sukkot 2": { he: "סוכות", fr: "Souccot 2", es: "Sucot 2", ru: "Суккот 2", de: "Sukkot 2", en: "Sukkot 2" },
+    "Passover 1": { he: "פסח", fr: "Pessa'h 1", es: "Pésaj 1", ru: "Песах 1", de: "Pessach 1", en: "Passover 1" },
+    "Passover 2": { he: "פסח", fr: "Pessa'h 2", es: "Pésaj 2", ru: "Песах 2", de: "Pessach 2", en: "Passover 2" },
+    "Passover 7": { he: "פסח", fr: "Pessa'h 7", es: "Pésaj 7", ru: "Песах 7", de: "Pessach 7", en: "Passover 7" },
+    "Passover 8": { he: "פסח", fr: "Pessa'h 8", es: "Pésaj 8", ru: "Песах 8", de: "Pessach 8", en: "Passover 8" },
+    "Shavuot 1": { he: "שבועות", fr: "Chavouot 1", es: "Shavuot 1", ru: "Шавуот 1", de: "Schawuot 1", en: "Shavuot 1" },
+    "Shavuot 2": { he: "שבועות", fr: "Chavouot 2", es: "Shavuot 2", ru: "Шавуот 2", de: "Schawuot 2", en: "Shavuot 2" },
+    "Hanukkah": { he: "חנוכה", fr: "Hanoucca", es: "Janucá", ru: "Ханука", de: "Chanukka", en: "Hanukkah" },
+    "Purim": { he: "פורים", fr: "Pourim", es: "Purim", ru: "Пурим", de: "Purim", en: "Purim" },
+    "Purim Katan": { he: "פורים קטן", fr: "Pourim Katan", es: "Purim Katan", ru: "Пурим Катан", de: "Purim Katan", en: "Purim Katan" },
+    "Tisha B'Av": { he: "תשעה באב", fr: "Ticha Beav", es: "Tishá beAv", ru: "9 Ава", de: "Tisch’a beAv", en: "Tisha B'Av" },
+    "Fast of Gedaliah": { he: "צום גדליה", fr: "Jeûne de Guedalia", es: "Ayuno de Gedalías", ru: "Пост Гедалии", de: "Gedalja-Fasten", en: "Fast of Gedaliah" },
+    "Asara B'Tevet": { he: "עשרה בטבת", fr: "Dix Tebeth", es: "Asara B'Tevet", ru: "10 Тевета", de: "Zehnter Tevet", en: "Asara B'Tevet" },
+    "17th of Tammuz": { he: "שבעה עשר בתמוז", fr: "17 Tammouz", es: "17 de Tamuz", ru: "17 Таммуза", de: "17. Tammus", en: "17th of Tammuz" },
+    "Fast of Esther": { he: "תענית אסתר", fr: "Jeûne d'Esther", es: "Ayuno de Ester", ru: "Пост Эстер", de: "Esther-Fasten", en: "Fast of Esther" },
+    "Rosh Chodesh": { he: "ראש חודש", fr: "Roch Hodech", es: "Rosh Jodesh", ru: "Рош Ходеш", de: "Rosch Chodesch", en: "Rosh Chodesh" },
     "Epiphany": {
         es: "Epifanía", fr: "Épiphanie", de: "Heilige Drei Könige", it: "Epifania", pl: "Trzech Króli",
         sv: "Trettondedag jul", fi: "Loppiainen", hr: "Sveta tri kralja", sk: "Traja králi",

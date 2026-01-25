@@ -68,6 +68,9 @@ export const TRANSLATIONS: Record<string, Record<string, string>> = {
         nationalHolidays: 'National Holidays / Pays',
         activeCalendars: 'Active Calendars',
         none: 'None',
+        performanceTitle: 'Performance',
+        performanceLite: 'Lite Mode',
+        performanceDesc: 'Reduces visual effects (blur, animations) for smoother performance on slower devices.',
     },
     zh: {
         title: '设置',

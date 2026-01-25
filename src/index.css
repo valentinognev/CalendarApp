@@ -76,12 +76,41 @@ body {
     var(--color-bg);
 }
 
+:root.lite-mode body {
+  background: var(--color-bg);
+  /* Simple solid background */
+  background-image: none !important;
+}
+
 /* Glassmorphism Utilities */
 .glass {
   background: var(--color-surface);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border: 1px solid var(--color-border);
+}
+
+/* Lite Mode Optimizations */
+:root.lite-mode .glass {
+  /* Disable Blur for performance */
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+
+  /* Make background more opaque to compensate for lack of blur */
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+}
+
+:root.dark.lite-mode .glass {
+  background: #0f172a;
+  /* Solid dark slate */
+  border-color: #1e293b;
+}
+
+:root.lite-mode * {
+  /* Disable complex animations */
+  animation-duration: 0.1s !important;
+  transition-duration: 0.1s !important;
 }
 
 /* Scrollbar Polish */

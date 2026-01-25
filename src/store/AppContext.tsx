@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
 import { addMonths, subMonths, addWeeks, subWeeks, isSameDay, startOfDay } from 'date-fns';
 import { getLanguageDirection } from '../services/LanguageService';
+import { getCoordinatesFromTimezone } from '../services/timezoneService';
 
 type ViewMode = 'month' | 'week';
 export type Language = string; // Support dynamic languages
@@ -45,12 +46,20 @@ export interface Settings {
     country: string; // For National Holidays
 
     // New Features
+    performanceMode: 'high' | 'lite';
     customDarkTheme?: CustomTheme;
     customLightTheme?: CustomTheme;
     imageSource: 'category' | 'local';
     imageCategories: string[]; // Changed to array
     localImagePath: string;
     imageChangeFrequency: number; // in milliseconds
+
+    // Location
+    manualLocation: boolean;
+    lat: number;
+    long: number;
+    manualCity: string;
+    manualCountry: string;
 }
 
 const DEFAULT_SETTINGS: Settings = {
@@ -67,16 +76,23 @@ const DEFAULT_SETTINGS: Settings = {
     country: 'United States', // Default
 
     // New Defaults
+    performanceMode: 'high',
     imageSource: 'category',
     imageCategories: ['Nature'], // Default array
     localImagePath: '',
     imageChangeFrequency: 3600000, // 1 hour
+    manualLocation: false,
+    lat: 31.0461, // Default to Israel
+    long: 34.8516,
+    manualCity: '',
+    manualCountry: ''
 };
 
 interface AppState {
     viewMode: ViewMode;
     isSplit: boolean;
     settings: Settings;
+    today: Date;
     currentDate: Date;
     events: CalendarEvent[];
     toggleView: () => void;
@@ -97,12 +113,21 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     const [viewMode, setViewMode] = useState<ViewMode>('month');
     const [isSplit, setIsSplit] = useState(false);
     const [currentDate, setCurrentDate] = useState(new Date());
+    const [today, setToday] = useState(startOfDay(new Date()));
     const [direction, setDirection] = useState<Direction>('ltr');
 
     const [settings, setSettings] = useState<Settings>(() => {
         try {
             const saved = localStorage.getItem('calendar_settings');
-            return saved ? { ...DEFAULT_SETTINGS, ...JSON.parse(saved) } : DEFAULT_SETTINGS;
+            let initialSettings = saved ? { ...DEFAULT_SETTINGS, ...JSON.parse(saved) } : DEFAULT_SETTINGS;
+
+            // Check URL Parameters for overrides (CLI-like usage)
+            const params = new URLSearchParams(window.location.search);
+            if (params.get('lite') === 'true' || params.get('performance') === 'lite') {
+                initialSettings.performanceMode = 'lite';
+            }
+
+            return initialSettings;
         } catch (e) {
             return DEFAULT_SETTINGS;
         }
@@ -128,6 +153,12 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
             document.documentElement.classList.add('light');
         }
 
+        if (settings.performanceMode === 'lite') {
+            document.documentElement.classList.add('lite-mode');
+        } else {
+            document.documentElement.classList.remove('lite-mode');
+        }
+
         const updateDir = async () => {
             const dir = await getLanguageDirection(settings.language);
             setDirection(dir);
@@ -142,6 +173,22 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     useEffect(() => {
         localStorage.setItem('calendar_events', JSON.stringify(events));
     }, [events]);
+
+    // auto-refresh 'today' every minute
+    useEffect(() => {
+        const interval = setInterval(() => {
+            const now = startOfDay(new Date());
+            if (now.getTime() !== today.getTime()) {
+                setToday(now);
+                // Also update currentDate if it's currently on "today" to follow the new day
+                setCurrentDate(prev => {
+                    if (isSameDay(prev, today)) return now;
+                    return prev;
+                });
+            }
+        }, 60000); // Check every minute
+        return () => clearInterval(interval);
+    }, [today]);
 
     const toggleView = () => setViewMode(prev => prev === 'month' ? 'week' : 'month');
     const toggleSplit = () => setIsSplit(prev => !prev);
@@ -201,6 +248,11 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     const [location, setLocation] = useState<{ lat: number; long: number } | null>(null);
 
     useEffect(() => {
+        if (settings.manualLocation) {
+            setLocation({ lat: settings.lat, long: settings.long });
+            return;
+        }
+
         if ('geolocation' in navigator) {
             navigator.geolocation.getCurrentPosition(
                 (position) => {
@@ -210,17 +262,28 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
                     });
                 },
                 (error) => {
-                    console.error('Geolocation denied or failed:', error);
-                    // Default to Jerusalem? Or just don't show times. 
-                    // Let's leave null to indicate "no local data"
+                    console.error('Geolocation denied or failed, using timezone/settings fallback:', error);
+                    const tzCoords = getCoordinatesFromTimezone();
+                    if (tzCoords) {
+                        setLocation({ lat: tzCoords.lat, long: tzCoords.long });
+                    } else {
+                        setLocation({ lat: settings.lat, long: settings.long });
+                    }
                 }
             );
+        } else {
+            const tzCoords = getCoordinatesFromTimezone();
+            if (tzCoords) {
+                setLocation({ lat: tzCoords.lat, long: tzCoords.long });
+            } else {
+                setLocation({ lat: settings.lat, long: settings.long });
+            }
         }
-    }, []);
+    }, [settings.manualLocation, settings.lat, settings.long]);
 
     return (
         <AppContext.Provider value={{
-            viewMode, isSplit, settings, currentDate, events, location, direction,
+            viewMode, isSplit, settings, today, currentDate, events, location, direction,
             toggleView, toggleSplit, updateSettings, navigate, jumpToToday,
             addEvent, deleteEvent, getEventsForDate
         }}>
