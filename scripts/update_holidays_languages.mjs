@@ -18,7 +18,7 @@ const HOLIDAYS = [
     { month: 'Nisan', day: 16, type: 'holiday', official: true, name: 'Passover 2' },
     { month: 'Nisan', day: 21, type: 'holiday', official: true, name: 'Passover 7' },
     { month: 'Nisan', day: 22, type: 'holiday', official: true, name: 'Passover 8' },
-    { month: 'Iyyar', day: 5, type: 'minor', official: false, name: 'Yom HaAtzmaut' },
+    { month: 'Iyyar', day: 5, type: 'holiday', official: true, name: 'Yom HaAtzmaut' },
     { month: 'Nisan', day: 27, type: 'minor', official: false, name: 'Yom HaShoah' },
     { month: 'Iyyar', day: 4, type: 'minor', official: false, name: 'Yom HaZikaron' },
     { month: 'Sivan', day: 6, type: 'holiday', official: true, name: 'Shavuot 1' },
@@ -105,11 +105,26 @@ const TRANSLATIONS = {
     'Shemini Atzeret': {
         en: 'Shemini Atzeret', he: 'שמיני עצרת', ru: 'Шмини Ацерет', es: 'Shemini Atzeret', fr: 'Chemini Atseret'
     },
-    'Hanukkah': {
-        en: 'Hanukkah', he: 'חנוכה', ru: 'Хаנוка', es: 'Janucá', fr: 'Hanoucca'
-    },
     'Shushan Purim': {
         en: 'Shushan Purim', he: 'שושן פורים', ru: 'Шушан Пурим'
+    },
+    'Hoshana Raba': {
+        en: 'Hoshana Raba', he: 'הושענא רבה', ru: 'Хошана Раба'
+    },
+    'Purim Katan': {
+        en: 'Purim Katan', he: 'פורים קטן', ru: 'Пурим Катан'
+    },
+    'Fast of Gedaliah': {
+        en: 'Fast of Gedaliah', he: 'צום גדליה', ru: 'Пост Гедалии'
+    },
+    'Asara B\'Tevet': {
+        en: 'Asara B\'Tevet', he: 'עשרה בטבת', ru: '10 Тевета'
+    },
+    '17th of Tammuz': {
+        en: '17th of Tammuz', he: 'שבעה עשר בתמוז', ru: '17 Таммуза'
+    },
+    'Fast of Esther': {
+        en: 'Fast of Esther', he: 'תענית אסתר', ru: 'Пост Эстер'
     }
 };
 
@@ -136,11 +151,19 @@ for (const h of HOLIDAYS) {
 
     for (const lang of LANGUAGES) {
         let name = h.name; // Default to English name in struct
-        if (TRANSLATIONS[baseKey] && TRANSLATIONS[baseKey][lang]) {
+
+        // Priority 1: Exact Match for the full name
+        if (TRANSLATIONS[h.name] && TRANSLATIONS[h.name][lang]) {
+            name = TRANSLATIONS[h.name][lang];
+        }
+        // Priority 2: Base Key Match (e.g. "Passover 1" -> "Passover")
+        else if (TRANSLATIONS[baseKey] && TRANSLATIONS[baseKey][lang]) {
             const trans = TRANSLATIONS[baseKey][lang];
             const suffix = h.name.replace(baseKey, '').trim();
             name = suffix ? `${trans} ${suffix}` : trans;
-        } else if (lang === 'he' && TRANSLATIONS[baseKey] && TRANSLATIONS[baseKey].he) {
+        }
+        // Priority 3: Hebrew Fallback for the base key
+        else if (lang === 'he' && TRANSLATIONS[baseKey] && TRANSLATIONS[baseKey].he) {
             name = TRANSLATIONS[baseKey].he;
         }
 

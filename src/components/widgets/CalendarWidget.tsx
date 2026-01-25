@@ -275,31 +275,23 @@ export const CalendarWidget: React.FC = () => {
 
                         const getCanonical = (name: string) => {
                             const low = name.toLowerCase();
-                            if (low.includes('independence day') || low.includes('haatzmaut')) return 'independence_day';
-                            if (low.includes('shoah') || low.includes('holocaust')) return 'yom_hashoah';
-                            if (low.includes('zikaron') || low.includes('memorial day')) return 'yom_hazikaron';
-                            if (low.includes('rosh hashanah')) return 'rosh_hashanah';
-                            if (low.includes('yom kippur')) return 'yom_kippur';
-                            if (low.includes('shavuot')) return 'shavuot';
-                            if (low.includes('sukkot')) return 'sukkot';
-                            if (low.includes('passover') || low.includes('pesach')) return 'passover';
-                            if (low.includes('simchat torah')) return 'simchat_torah';
-                            if (low.includes('shemini atzeret')) return 'shemini_atzeret';
-                            if (low.includes('hanukkah') || low.includes('chanukah')) return 'hanukkah';
-                            if (low.includes('purim')) return 'purim';
-                            // Hebrew equivalents for the Set
-                            if (name === 'יום העצמאות') return 'independence_day';
-                            if (name === 'יום השואה') return 'yom_hashoah';
-                            if (name === 'יום הזיכרון') return 'yom_hazikaron';
-                            if (name.includes('ראש השנה')) return 'rosh_hashanah';
-                            if (name === 'יום כיפור') return 'yom_kippur';
-                            if (name.includes('שבועות')) return 'shavuot';
-                            if (name.includes('סוכות')) return 'sukkot';
-                            if (name.includes('פסח')) return 'passover';
-                            if (name === 'שמחת תורה') return 'simchat_torah';
-                            if (name === 'שמיני עצרת') return 'shemini_atzeret';
-                            if (name.includes('חנוכה')) return 'hanukkah';
-                            if (name.includes('פורים')) return 'purim';
+                            if (low.includes('independence') || low.includes('atzmaut') || low.includes('עצמאות')) return 'independence_day';
+                            if (low.includes('shoah') || low.includes('holocaust') || low.includes('שואה')) return 'yom_hashoah';
+                            if (low.includes('zikaron') || low.includes('memorial day') || low.includes('זיכרון')) return 'yom_hazikaron';
+                            if (low.includes('rosh hashanah') || low.includes('hashana') || low.includes('ראש השנה')) return 'rosh_hashanah';
+                            if (low.includes('yom kippur') || low.includes('kipur') || low.includes('יום כיפור')) return 'yom_kippur';
+                            if (low.includes('shavuot') || low.includes('שבועות')) return 'shavuot';
+                            if (low.includes('sukkot') || low.includes('סוכות')) return 'sukkot';
+                            if (low.includes('passover') || low.includes('pesach') || low.includes('פסח')) return 'passover';
+                            if (low.includes('simchat torah') || low.includes('שמחת תורה')) return 'simchat_torah';
+                            if (low.includes('shemini atzeret') || low.includes('שמיני עצרת')) return 'shemini_atzeret';
+                            if (low.includes('hanukkah') || low.includes('chanukah') || low.includes('חנוכה')) return 'hanukkah';
+                            if (low.includes('purim') || low.includes('פורים')) return 'purim';
+                            if (low.includes('esther') || low.includes('אסתר')) return 'fast_of_esther';
+                            if (low.includes('tammuz') || low.includes('תמוז')) return '17th_of_tammuz';
+                            if (low.includes('gedaliah') || low.includes('גדליה')) return 'fast_of_gedaliah';
+                            if (low.includes('tevet') || low.includes('טבת')) return 'asara_btevet';
+                            if (low.includes('hoshana') || low.includes('הושענא')) return 'hoshana_raba';
                             return low;
                         };
 
