@@ -71,6 +71,8 @@ export const TRANSLATIONS: Record<string, Record<string, string>> = {
         performanceTitle: 'Performance',
         performanceLite: 'Lite Mode',
         performanceDesc: 'Reduces visual effects (blur, animations) for smoother performance on slower devices.',
+        autoTheme: 'Automatic Theme',
+        autoThemeDesc: 'Switch themes at 7:00 and Sunset (requires Location)',
     },
     zh: {
         title: '设置',
@@ -278,6 +280,8 @@ export const TRANSLATIONS: Record<string, Record<string, string>> = {
         nationalHolidays: 'חגים לאומיים',
         activeCalendars: 'לוחות שנה פעילים',
         none: 'ללא',
+        autoTheme: 'מצב אוטומטי',
+        autoThemeDesc: 'החלף מצב ב-7:00 ובשקיעה (דורש מיקום)',
     },
     es: {
         title: 'Configuración',

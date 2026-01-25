@@ -1,7 +1,8 @@
 import React, { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
-import { addMonths, subMonths, addWeeks, subWeeks, isSameDay, startOfDay } from 'date-fns';
+import { addMonths, subMonths, addWeeks, subWeeks, isSameDay, startOfDay, format } from 'date-fns';
 import { getLanguageDirection } from '../services/LanguageService';
 import { getCoordinatesFromTimezone } from '../services/timezoneService';
+import { fetchSunsetTimes, getSunsetTime } from '../services/SunsetService';
 
 type ViewMode = 'month' | 'week';
 export type Language = string; // Support dynamic languages
@@ -60,6 +61,7 @@ export interface Settings {
     long: number;
     manualCity: string;
     manualCountry: string;
+    autoTheme: boolean;
 }
 
 const DEFAULT_SETTINGS: Settings = {
@@ -85,7 +87,8 @@ const DEFAULT_SETTINGS: Settings = {
     lat: 31.0461, // Default to Israel
     long: 34.8516,
     manualCity: '',
-    manualCountry: ''
+    manualCountry: '',
+    autoTheme: false
 };
 
 interface AppState {
@@ -115,6 +118,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     const [currentDate, setCurrentDate] = useState(new Date());
     const [today, setToday] = useState(startOfDay(new Date()));
     const [direction, setDirection] = useState<Direction>('ltr');
+    const [location, setLocation] = useState<{ lat: number; long: number } | null>(null);
 
     const [settings, setSettings] = useState<Settings>(() => {
         try {
@@ -174,21 +178,54 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         localStorage.setItem('calendar_events', JSON.stringify(events));
     }, [events]);
 
-    // auto-refresh 'today' every minute
+    const [sunsetMap, setSunsetMap] = useState<Map<number, Record<string, string>>>(new Map());
+
     useEffect(() => {
-        const interval = setInterval(() => {
-            const now = startOfDay(new Date());
-            if (now.getTime() !== today.getTime()) {
-                setToday(now);
-                // Also update currentDate if it's currently on "today" to follow the new day
+        const loadSunsets = async () => {
+            const map = await fetchSunsetTimes();
+            setSunsetMap(map);
+        };
+        loadSunsets();
+    }, []);
+
+    // auto-theme and auto-refresh 'today' every minute
+    useEffect(() => {
+        const refresh = () => {
+            const now = new Date();
+            const startOfToday = startOfDay(now);
+
+            // 1. Refresh today
+            if (startOfToday.getTime() !== today.getTime()) {
+                setToday(startOfToday);
                 setCurrentDate(prev => {
-                    if (isSameDay(prev, today)) return now;
+                    if (isSameDay(prev, today)) return startOfToday;
                     return prev;
                 });
             }
-        }, 60000); // Check every minute
+
+            // 2. Auto Theme Switching
+            if (settings.autoTheme && sunsetMap.size > 0) {
+                const currentTime = format(now, 'HH:mm');
+                const effectiveLat = location?.lat ?? settings.lat;
+                const sunsetStr = getSunsetTime(now, effectiveLat, sunsetMap);
+
+                if (sunsetStr) {
+                    const isAfter7AM = currentTime >= '07:00';
+                    const isBeforeSunset = currentTime < sunsetStr;
+                    const targetTheme = (isAfter7AM && isBeforeSunset) ? 'light' : 'dark';
+
+                    if (settings.theme !== targetTheme) {
+                        console.log(`[AutoTheme] Switching to ${targetTheme} (Time: ${currentTime}, Sunset: ${sunsetStr})`);
+                        updateSettings({ theme: targetTheme });
+                    }
+                }
+            }
+        };
+
+        refresh(); // Immediate check
+        const interval = setInterval(refresh, 60000); // Subsequent checks
         return () => clearInterval(interval);
-    }, [today]);
+    }, [today, settings.autoTheme, settings.theme, location, sunsetMap]);
 
     const toggleView = () => setViewMode(prev => prev === 'month' ? 'week' : 'month');
     const toggleSplit = () => setIsSplit(prev => !prev);
@@ -204,11 +241,11 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         });
     };
 
-    const navigate = (direction: 'prev' | 'next') => {
+    const navigate = (dir: 'prev' | 'next') => {
         if (viewMode === 'month') {
-            setCurrentDate(prev => direction === 'next' ? addMonths(prev, 1) : subMonths(prev, 1));
+            setCurrentDate(prev => dir === 'next' ? addMonths(prev, 1) : subMonths(prev, 1));
         } else {
-            setCurrentDate(prev => direction === 'next' ? addWeeks(prev, 1) : subWeeks(prev, 1));
+            setCurrentDate(prev => dir === 'next' ? addWeeks(prev, 1) : subWeeks(prev, 1));
         }
     };
 
@@ -244,8 +281,6 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
             }
         });
     };
-
-    const [location, setLocation] = useState<{ lat: number; long: number } | null>(null);
 
     useEffect(() => {
         if (settings.manualLocation) {

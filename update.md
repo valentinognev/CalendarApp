@@ -6,6 +6,7 @@
 - **Sunset/Shabbat Integration**: Implemented `SunsetService` to calculate Shabbat entry/exit times based on location (latitude) using a lookup table (`SunsetTimes.csv`).
 - **Jewish Holidays Overhaul**: Migrated holiday data to `JewishSpecialDays.csv`. Completed a **Full Hebrew Audit**, ensuring 100% Hebrew coverage for all holidays and fast days. Refined deduplication logic to handle multi-language overlaps seamlessly.
 - **Dynamic Holiday Timings**: Extended the Shabbat timing engine to all official holidays. The app now displays **Candle Lighting (🕯️)** on the eve of any official holiday and **Star Appearance (✨)** at its conclusion, using location-aware lookahead logic.
+- **Automatic Theme Switching**: Implemented a location-aware theme engine. Toggles to **Light mode at 07:00** and to **Dark mode exactly at Sunset**, ensuring the app matches the natural rhythm of the user's environment.
 - **Responsive Fluid UI**: Implemented **Global Dynamic Scaling** via responsive root font-size (`clamp`). Refined this to be **Settings-Relative**, allowing the UI to respect manual "Small/Medium/Large" user preferences while staying perfectly responsive.
 - **Location Self-Sufficiency**: Added **Automatic Geocoding Search** (via Nominatim) and Timezone-based coordinate fallback, making the Shabbat times work out-of-the-box worldwide.
 - **Portability**: Converted all data fetching to relative paths and added a modern `install.sh` for easy deployment.

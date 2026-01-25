@@ -445,18 +445,42 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
                                         <Palette size={16} /> {t.themeTitle}
                                     </h3>
 
-                                    <div className="flex gap-4 p-1 bg-slate-800/50 rounded-2xl w-fit">
+                                    <div className={`flex gap-4 p-1 bg-slate-800/50 rounded-2xl w-fit transition-opacity duration-300 ${settings.autoTheme ? 'opacity-50 pointer-events-none' : ''}`}>
                                         <button
                                             onClick={() => updateSettings({ theme: 'dark' })}
+                                            disabled={settings.autoTheme}
                                             className={`flex items-center gap-2 px-6 py-3 rounded-xl transition-all ${settings.theme === 'dark' ? 'bg-slate-700 text-white shadow-lg' : 'text-slate-400 hover:text-white'}`}
                                         >
                                             <Moon size={18} /> Dark
                                         </button>
                                         <button
                                             onClick={() => updateSettings({ theme: 'light' })}
+                                            disabled={settings.autoTheme}
                                             className={`flex items-center gap-2 px-6 py-3 rounded-xl transition-all ${settings.theme === 'light' ? 'bg-white text-slate-900 shadow-lg' : 'text-slate-400 hover:text-white'}`}
                                         >
                                             <Sun size={18} /> Light
+                                        </button>
+                                    </div>
+
+                                    {/* Auto Theme Toggle */}
+                                    <div className="bg-slate-800/20 p-5 rounded-2xl border border-slate-700/30 flex items-center justify-between group hover:border-sky-500/30 transition-all">
+                                        <div className="flex gap-4">
+                                            <div className="p-3 bg-sky-500/10 rounded-xl text-sky-400">
+                                                <Clock size={20} />
+                                            </div>
+                                            <div>
+                                                <div className="text-sm font-semibold text-slate-200">{t.autoTheme || 'Automatic Theme'}</div>
+                                                <div className="text-[10px] text-slate-500 mt-1 font-medium">
+                                                    {t.autoThemeDesc || 'Switch themes at 7:00 and Sunset (requires Location)'}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <button
+                                            onClick={() => updateSettings({ autoTheme: !settings.autoTheme })}
+                                            dir="ltr"
+                                            className={`relative inline-flex h-7 w-12 items-center rounded-full transition-colors ${settings.autoTheme ? 'bg-sky-500' : 'bg-slate-700'}`}
+                                        >
+                                            <span className={`inline-block h-5 w-5 transform rounded-full bg-white transition-transform ${settings.autoTheme ? 'translate-x-6' : 'translate-x-1'}`} />
                                         </button>
                                     </div>
                                 </section>
