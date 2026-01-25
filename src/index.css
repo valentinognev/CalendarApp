@@ -29,7 +29,7 @@
   font-weight: 400;
 
   /* Global Scaling: Adjusts base REM unit based on viewport size */
-  font-size: clamp(12px, 0.9vw + 0.9vh, 18px);
+  font-size: clamp(12px, 1vw + 1vh, 24px);
 
   overflow: hidden;
 }

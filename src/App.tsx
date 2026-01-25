@@ -10,6 +10,7 @@ import { format, startOfMonth, endOfMonth, startOfWeek, endOfWeek, isSameMonth }
 import { getLocale } from './utils/dateLocales';
 import { getTranslations } from './utils/translations';
 import { HDate } from '@hebcal/core';
+import { CalendarStrategyFactory } from './services/calendar/CalendarStrategyFactory';
 
 const DashboardContent: React.FC = () => {
   const { viewMode, toggleView, toggleSplit, isSplit, currentDate, navigate, jumpToToday, settings } = useAppStore();
@@ -18,14 +19,39 @@ const DashboardContent: React.FC = () => {
   const currentLocale = getLocale(settings.language);
   const t = getTranslations(settings.language);
 
-  const headerTitle = format(currentDate, viewMode === 'month' ? 'LLLL yyyy' : "'Week of' MMM d, yyyy", { locale: currentLocale });
+  const strategy = CalendarStrategyFactory.getStrategy(settings.calendarSystem);
+  const titleData = strategy.getTitle(currentDate, settings.language);
+  const headerTitle = titleData.primary;
 
   // --- Secondary Calendar Subtitles ---
   const activeSubtitles: string[] = [];
 
-  // 1. Jewish Calendar
-  if (settings.activeCalendars.includes('jewish')) {
-    // Determine range based on view
+  // Strategy Secondary Title (e.g. Gregorian range on Jewish view)
+  if (titleData.secondary) {
+    activeSubtitles.push(titleData.secondary);
+  }
+
+  // --- Subtitles Generation ---
+  // The goal: Show all enabled calendars EXCEPT the one used as "Primary"
+
+  // 1. Gregorian Subtitle (if NOT primary)
+  if (settings.calendarSystem !== 'gregorian') {
+    const locale = currentLocale;
+    const startDate = viewMode === 'month' ? startOfMonth(currentDate) : startOfWeek(currentDate, { weekStartsOn: settings.weekStart as 0 | 1, locale });
+    const endDate = viewMode === 'month' ? endOfMonth(currentDate) : endOfWeek(currentDate, { weekStartsOn: settings.weekStart as 0 | 1, locale });
+
+    const fStart = format(startDate, 'LLLL', { locale });
+    if (isSameMonth(startDate, endDate)) {
+      activeSubtitles.push(format(startDate, 'LLLL yyyy', { locale }));
+    } else if (startDate.getFullYear() !== endDate.getFullYear()) {
+      activeSubtitles.push(`${format(startDate, 'LLLL yyyy', { locale })} - ${format(endDate, 'LLLL yyyy', { locale })}`);
+    } else {
+      activeSubtitles.push(`${fStart} - ${format(endDate, 'LLLL yyyy', { locale })}`);
+    }
+  }
+
+  // 2. Jewish Calendar (Only if enabled AND NOT primary)
+  if (settings.activeCalendars.includes('jewish') && settings.calendarSystem !== 'jewish') {
     const weekStartParams = { weekStartsOn: settings.weekStart as 0 | 1, locale: currentLocale };
     const startDate = viewMode === 'month' ? startOfMonth(currentDate) : startOfWeek(currentDate, weekStartParams);
     const endDate = viewMode === 'month' ? endOfMonth(currentDate) : endOfWeek(currentDate, weekStartParams);
@@ -34,77 +60,43 @@ const DashboardContent: React.FC = () => {
     const hEnd = new HDate(endDate);
 
     const JEWISH_MONTHS_RU: Record<string, string> = {
-      'Nisan': 'Нисан',
-      'Iyyar': 'Ияр',
-      'Sivan': 'Сиван',
-      'Tamuz': 'Таммуз',
-      'Av': 'Ав',
-      'Elul': 'Элуль',
-      'Tishrei': 'Тишрей',
-      'Cheshvan': 'Хешван',
-      'Kislev': 'Кислев',
-      'Tevet': 'Тевет',
-      'Sh\'vat': 'Шват',
-      'Adar': 'Адар',
-      'Adar I': 'Адар I',
-      'Adar II': 'Адар II'
+      'Nisan': 'Нисан', 'Iyyar': 'Ияр', 'Sivan': 'Сиван', 'Tamuz': 'Таммуз',
+      'Av': 'Ав', 'Elul': 'Элуль', 'Tishrei': 'Тишрей', 'Cheshvan': 'Хешван',
+      'Kislev': 'Кислев', 'Tevet': 'Тевет', 'Sh\'vat': 'Шват', 'Adar': 'Адар',
+      'Adar I': 'Адар I', 'Adar II': 'Адар II'
     };
 
-    // Helper to get formatted month/year for Jewish
     const getHString = (h: HDate) => {
       if (settings.language === 'he') {
         const parts = h.renderGematriya(true).split(' ');
-        return {
-          month: parts.slice(1, -1).join(' '),
-          year: parts.slice(-1)[0],
-          full: parts.slice(1).join(' ')
-        };
-      } else if (settings.language === 'ru') {
-        const monthName = h.getMonthName();
-        const translatedMonth = JEWISH_MONTHS_RU[monthName] || monthName;
-        return {
-          month: translatedMonth,
-          year: h.getFullYear().toString(),
-          full: `${translatedMonth} ${h.getFullYear()}`
-        };
+        return { month: parts.slice(1, -1).join(' '), year: parts.slice(-1)[0], full: parts.slice(1).join(' ') };
       } else {
-        return {
-          month: h.getMonthName(),
-          year: h.getFullYear().toString(),
-          full: `${h.getMonthName()} ${h.getFullYear()}`
-        };
+        const monthName = h.getMonthName();
+        const translatedMonth = settings.language === 'ru' ? JEWISH_MONTHS_RU[monthName] || monthName : monthName;
+        return { month: translatedMonth, year: h.getFullYear().toString(), full: `${translatedMonth} ${h.getFullYear()}` };
       }
     };
 
     const startObj = getHString(hStart);
     const endObj = getHString(hEnd);
-
-    let jStr = '';
     if (startObj.full === endObj.full) {
-      jStr = startObj.full;
+      activeSubtitles.push(startObj.full);
     } else if (startObj.year === endObj.year) {
-      jStr = `${startObj.month} - ${endObj.full}`;
+      activeSubtitles.push(`${startObj.month} - ${endObj.full}`);
     } else {
-      jStr = `${startObj.full} - ${endObj.full}`;
+      activeSubtitles.push(`${startObj.full} - ${endObj.full}`);
     }
-    activeSubtitles.push(jStr);
   }
 
-  // 2. Muslim Calendar
-  if (settings.activeCalendars.includes('muslim')) {
-    // We can use Intl for Hijri (Umm al-Qura)
-    // Note: This relies on browser support for 'islamic-umalqura'
+  // 3. Muslim Calendar (Only if enabled AND NOT primary)
+  if (settings.activeCalendars.includes('muslim') && settings.calendarSystem !== 'muslim') {
     const hijriFormatter = new Intl.DateTimeFormat(`${settings.language}-u-ca-islamic-umalqura`, {
       month: 'long',
       year: 'numeric'
     });
-
     const startDate = viewMode === 'month' ? startOfMonth(currentDate) : startOfWeek(currentDate);
     const endDate = viewMode === 'month' ? endOfMonth(currentDate) : endOfWeek(currentDate);
 
-    // Get string for start and end
-    // Format usually: "Ramadan 1447 AH"
-    // We just want "Ramadan 1447"
     const formatHijri = (d: Date) => {
       const parts = hijriFormatter.formatToParts(d);
       const month = parts.find(p => p.type === 'month')?.value || '';
@@ -114,22 +106,19 @@ const DashboardContent: React.FC = () => {
 
     const hStart = formatHijri(startDate);
     const hEnd = formatHijri(endDate);
-
-    let mStr = '';
     if (hStart.full === hEnd.full) {
-      mStr = hStart.full;
+      activeSubtitles.push(hStart.full);
     } else if (hStart.year === hEnd.year) {
-      mStr = `${hStart.month} - ${hEnd.full}`;
+      activeSubtitles.push(`${hStart.month} - ${hEnd.full}`);
     } else {
-      mStr = `${hStart.full} - ${hEnd.full}`;
+      activeSubtitles.push(`${hStart.full} - ${hEnd.full}`);
     }
-    activeSubtitles.push(mStr);
   }
 
   const CalendarSection = (
     <>
       {/* Main Header */}
-      <header className="relative flex items-end justify-between mb-4 pb-2">
+      <header className="relative flex items-end justify-between mb-4 pb-2 flex-none">
 
         {/* LEFT: Clock */}
         <div className="z-10">
@@ -152,7 +141,7 @@ const DashboardContent: React.FC = () => {
               onClick={jumpToToday}
               title="Jump to Today"
             >
-              <h2 className="text-[clamp(2rem,6vw,4.5rem)] font-bold text-text-main capitalize tracking-tighter min-w-[max-content] leading-none drop-shadow-2xl">
+              <h2 className="text-[clamp(1.5rem,5vw,3rem)] font-bold text-text-main capitalize tracking-tighter min-w-[max-content] leading-none drop-shadow-2xl">
                 {headerTitle}
               </h2>
               {activeSubtitles.length > 0 && (

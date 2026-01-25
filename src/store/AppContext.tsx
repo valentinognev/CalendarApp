@@ -1,8 +1,9 @@
 import React, { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
-import { addMonths, subMonths, addWeeks, subWeeks, isSameDay, startOfDay, format } from 'date-fns';
+import { addWeeks, subWeeks, isSameDay, startOfDay, format } from 'date-fns';
 import { getLanguageDirection } from '../services/LanguageService';
 import { getCoordinatesFromTimezone } from '../services/timezoneService';
 import { fetchSunsetTimes, getSunsetTime } from '../services/SunsetService';
+import { CalendarStrategyFactory } from '../services/calendar/CalendarStrategyFactory';
 
 type ViewMode = 'month' | 'week';
 export type Language = string; // Support dynamic languages
@@ -40,11 +41,14 @@ export interface Settings {
     highlightWeekend: WeekendMode;
     dayNumberSize: Size;
     dayNumberAlign: Alignment;
+    primaryDayNumberStyle: 'sans' | 'serif';
+    secondaryDayNumberStyle: 'sans' | 'serif';
     dayNameSize: Size; // sm, md, lg
     dayNameAlign: Alignment;
     timeFormat: '12' | '24';
     activeCalendars: string[]; // e.g., 'jewish', 'muslim'
     country: string; // For National Holidays
+    calendarSystem: 'gregorian' | 'jewish' | 'muslim'; // Primary Calendar System
 
     // New Features
     performanceMode: 'high' | 'lite';
@@ -71,11 +75,14 @@ const DEFAULT_SETTINGS: Settings = {
     highlightWeekend: 'both',
     dayNumberSize: 'lg',
     dayNumberAlign: 'left',
+    primaryDayNumberStyle: 'sans',
+    secondaryDayNumberStyle: 'serif',
     dayNameSize: 'sm',
     dayNameAlign: 'center',
     timeFormat: '24',
     activeCalendars: [],
     country: 'United States', // Default
+    calendarSystem: 'gregorian',
 
     // New Defaults
     performanceMode: 'high',
@@ -267,7 +274,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
     const navigate = (dir: 'prev' | 'next') => {
         if (viewMode === 'month') {
-            setCurrentDate(prev => dir === 'next' ? addMonths(prev, 1) : subMonths(prev, 1));
+            const strategy = CalendarStrategyFactory.getStrategy(settings.calendarSystem);
+            setCurrentDate(prev => strategy.navigate(prev, dir));
         } else {
             setCurrentDate(prev => dir === 'next' ? addWeeks(prev, 1) : subWeeks(prev, 1));
         }

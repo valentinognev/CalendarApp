@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAppStore } from '../../store/AppContext';
-import { startOfMonth, endOfMonth, startOfWeek, endOfWeek, eachDayOfInterval, format, isSameMonth, isToday, isWeekend, addMinutes, subMinutes, parse } from 'date-fns';
+import { startOfWeek, endOfWeek, eachDayOfInterval, format, isWeekend, addMinutes, subMinutes, parse } from 'date-fns';
 import { getLocale } from '../../utils/dateLocales';
 import { HDate } from '@hebcal/core';
 import { EventModal } from '../events/EventModal';
@@ -8,25 +8,21 @@ import { fetchJewishHolidays, type JewishHoliday } from '../../services/JewishHo
 import { fetchMuslimHolidays, getHijriDate, type MuslimHoliday } from '../../services/MuslimHolidayService';
 import { fetchCountryList, fetchNationalHolidays, type NationalHoliday } from '../../services/NationalHolidayService';
 import { fetchSunsetTimes, getSunsetTime } from '../../services/SunsetService';
+import { CalendarStrategyFactory } from '../../services/calendar/CalendarStrategyFactory';
+import { JewishStrategy } from '../../services/calendar/JewishStrategy';
 
 const SIZE_MAP: Record<string, string> = {
-    sm: 'text-sm',
-    md: 'text-lg',
-    lg: 'text-2xl',
-    xl: 'text-4xl'
+    sm: 'text-base',
+    md: 'text-xl',
+    lg: 'text-3xl',
+    xl: 'text-5xl'
 };
 
 const NAME_SIZE_MAP: Record<string, string> = {
-    sm: 'text-[0.7rem]',
-    md: 'text-sm',
-    lg: 'text-base',
-    xl: 'text-lg'
-};
-
-const ALIGN_MAP: Record<string, string> = {
-    left: 'items-start text-left',
-    center: 'items-center text-center',
-    right: 'items-end text-right'
+    sm: 'text-xs',
+    md: 'text-base',
+    lg: 'text-lg',
+    xl: 'text-xl'
 };
 
 const TEXT_ALIGN_MAP: Record<string, string> = {
@@ -77,41 +73,41 @@ export const CalendarWidget: React.FC = () => {
     const weekStartParams = { weekStartsOn: settings.weekStart as 0 | 1, locale: currentLocale };
 
     const renderCalendarGrid = () => {
-        let startDate: Date;
-        let endDate: Date;
-        const monthStart = startOfMonth(currentDate);
 
-        if (viewMode === 'week') {
-            startDate = startOfWeek(currentDate, weekStartParams);
-            endDate = endOfWeek(currentDate, weekStartParams);
-        } else {
-            const monthEnd = endOfMonth(currentDate);
-            startDate = startOfWeek(monthStart, weekStartParams);
-            endDate = endOfWeek(monthEnd, weekStartParams);
-        }
-
-        const calendarDays = eachDayOfInterval({ start: startDate, end: endDate });
         const weekDays = eachDayOfInterval({
             start: startOfWeek(currentDate, weekStartParams),
             end: endOfWeek(currentDate, weekStartParams)
         });
 
+        // ---------------------------------------------------------
+        // Strategy Integration
+        // ---------------------------------------------------------
+        const strategy = CalendarStrategyFactory.getStrategy(settings.calendarSystem);
+
+        const loadDays = () => {
+            return strategy.getGridDays(currentDate, settings.weekStart as 0 | 1, settings.language);
+        };
+
+        const calendarItems = loadDays(); // Returns CalendarDateInfo[]
+
         // Corner Styles
-        const topLeft = 'top-2 left-2';
-        const topRight = 'top-2 right-2';
+        const topLeft = 'top-1 left-2';
+        const topRight = 'top-1 right-2';
+        const bottomLeft = 'bottom-2 left-2';
+        const bottomRight = 'bottom-2 right-2';
 
         return (
-            <div className="flex flex-col h-full animate-in fade-in duration-500 border-t border-border pt-4">
+            <div className="flex flex-col flex-grow min-h-0 animate-in fade-in duration-500 border-t border-border pt-4">
                 {/* Header Row */}
                 <div className="grid grid-cols-7 mb-2 pb-1">
                     {weekDays.map(day => (
                         <div
                             key={day.toString()}
                             className={`
-                                text-text-muted font-semibold uppercase tracking-wider pr-4
-                                ${NAME_SIZE_MAP[settings.dayNameSize] || 'text-xs'}
-                                ${TEXT_ALIGN_MAP[settings.dayNameAlign]}
-                            `}
+                            text-text-muted font-semibold uppercase tracking-wider pr-4
+                            ${NAME_SIZE_MAP[settings.dayNameSize] || 'text-xs'}
+                            ${TEXT_ALIGN_MAP[settings.dayNameAlign]}
+                        `}
                         >
                             {format(day, 'EEE', { locale: currentLocale })}
                         </div>
@@ -119,10 +115,16 @@ export const CalendarWidget: React.FC = () => {
                 </div>
 
                 {/* Grid */}
-                <div className={`grid grid-cols-7 gap-2 flex-grow ${viewMode === 'week' ? 'grid-rows-1' : `grid-rows-${calendarDays.length / 7}`}`}>
-                    {calendarDays.map((day) => {
-                        const isCurrentMonth = viewMode === 'week' ? true : isSameMonth(day, monthStart);
-                        const isDayToday = isToday(day);
+                <div
+                    className="grid grid-cols-7 gap-2 flex-grow min-h-0"
+                    style={{
+                        gridTemplateRows: viewMode === 'week' ? '1fr' : `repeat(${calendarItems.length / 7}, 1fr)`
+                    }}
+                >
+                    {calendarItems.map((item) => {
+                        const day = item.date;
+                        const isCurrentMonth = viewMode === 'week' ? true : item.isPrimaryMonth;
+                        const isDayToday = item.isToday;
                         const isDayWeekend = isWeekend(day);
                         const dayEvents = getEventsForDate(day);
 
@@ -144,7 +146,7 @@ export const CalendarWidget: React.FC = () => {
 
                         if (activeCals.includes('jewish')) {
                             const hdate = new HDate(day);
-                            const jDayStr = hdate.renderGematriya().split(' ')[0].replace(/'/g, '');
+                            const jDayStr = JewishStrategy.getLocalizedDay(hdate, settings.language);
                             const isRoshChodesh = hdate.getDate() === 1;
 
                             let jMatch = jewishHolidays.find(h => h.month === hdate.getMonthName() && h.day === hdate.getDate());
@@ -186,13 +188,28 @@ export const CalendarWidget: React.FC = () => {
                             else if (jMatch?.type === 'chol_hamoed') jStyle = 'text-orange-500 font-bold';
                             else if (isRoshChodesh) jStyle = 'text-cyan-600 font-bold';
 
-                            calendarData.push({
-                                type: 'jewish',
-                                dayStr: jDayStr,
-                                holiday: jName,
-                                style: jStyle,
-                                corner: direction === 'rtl' ? topLeft : topRight
-                            });
+                            // Only push to corner data if it's NOT already the primary/secondary label
+                            // (In Gregorian system, Jewish is the secondary label)
+                            // (In Jewish system, it's the primary label)
+                            // In any other future system (like Muslim primary), we would push it.
+                            if (settings.calendarSystem !== 'jewish' && settings.calendarSystem !== 'gregorian') {
+                                calendarData.push({
+                                    type: 'jewish',
+                                    dayStr: jDayStr,
+                                    holiday: jName,
+                                    style: jStyle,
+                                    corner: direction === 'rtl' ? topLeft : topRight
+                                });
+                            } else if (jName) {
+                                // Even if we don't show the number, we still need the holiday name for the bottom list
+                                calendarData.push({
+                                    type: 'jewish',
+                                    dayStr: '', // Don't show number (redundant)
+                                    holiday: jName,
+                                    style: '',
+                                    corner: ''
+                                } as any);
+                            }
 
                             // Shabbat & Holiday Times
                             if (location) {
@@ -225,12 +242,12 @@ export const CalendarWidget: React.FC = () => {
 
                         // 2. Muslim Calendar
                         if (activeCals.includes('muslim')) {
-                            const hDate = getHijriDate(day);
-                            const mMatch = muslimHolidays.find(h => h.month === hDate.month && h.day === hDate.day);
+                            const hDate = getHijriDate(day, settings.language);
+                            const mMatch = muslimHolidays.find(h => h.month === hDate.month && h.day === hDate.dayNum);
                             let mName = '';
                             if (mMatch) {
                                 mName = mMatch.names[settings.language] || mMatch.names['en'] || '';
-                                if (mMatch.official) isOfficial = true; // Mark official if any calendar says so
+                                if (mMatch.official) isOfficial = true;
                             }
 
                             let mStyle = 'text-emerald-600/60 font-serif text-sm';
@@ -238,10 +255,10 @@ export const CalendarWidget: React.FC = () => {
 
                             calendarData.push({
                                 type: 'muslim',
-                                dayStr: `${hDate.day}`, // Just number for cleaner UI?
+                                dayStr: hDate.day, // Localized day (e.g. ١ vs 1)
                                 holiday: mName,
                                 style: mStyle,
-                                corner: direction === 'rtl' ? topLeft : topRight
+                                corner: direction === 'rtl' ? bottomLeft : bottomRight
                             });
                         }
 
@@ -321,8 +338,7 @@ export const CalendarWidget: React.FC = () => {
                                 key={day.toString()}
                                 onClick={() => setSelectedDate(day)}
                                 className={`
-                                  p-2.5 rounded-2xl relative flex flex-col transition-all hover:-translate-y-1 hover:bg-surface-hover cursor-pointer group min-h-0
-                                  ${ALIGN_MAP[settings.dayNumberAlign]}
+                                  pt-1 pb-2.5 px-2.5 rounded-2xl relative flex flex-col transition-all hover:-translate-y-1 hover:bg-surface-hover cursor-pointer group min-h-0
                                   ${isDayToday
                                         ? 'bg-gradient-to-br from-surface to-primary/20 border border-primary shadow-[0_0_15px_var(--color-primary-glow)]'
                                         : shouldHighlightWeekend
@@ -332,18 +348,39 @@ export const CalendarWidget: React.FC = () => {
                                   ${isOfficial ? 'ring-1 ring-yellow-500/50' : ''} 
                                 `}
                             >
-                                <span className={`font-bold mb-auto ${SIZE_MAP[settings.dayNumberSize]} ${isDayToday ? 'text-primary' : (isOfficial || shouldHighlightWeekend) ? 'text-red-600 dark:text-red-400' : 'text-text-main'}`}>
-                                    {format(day, 'd')}
-                                </span>
+                                {/* Header area: Flexbox ensures labels stay on opposite sides and never overlap */}
+                                <div className="flex justify-between items-start pt-1 px-1">
+                                    {/* Primary Label (Starts at the leading edge) */}
+                                    <div className={`
+                                        font-bold leading-none
+                                        ${SIZE_MAP[settings.dayNumberSize]}
+                                        ${settings.primaryDayNumberStyle === 'serif' ? 'font-serif' : 'font-sans'}
+                                        ${isDayToday ? 'text-primary' : (isOfficial || shouldHighlightWeekend) ? 'text-red-600 dark:text-red-400' : 'text-text-main'} 
+                                    `}>
+                                        {item.primaryLabel}
+                                    </div>
 
-                                {/* Additional Calendars (Corners) */}
+                                    {/* Secondary Label (Ends at the trailing edge) */}
+                                    {item.secondaryLabel && (
+                                        <div className={`
+                                            opacity-50 font-bold text-text-muted leading-tight
+                                            ${SIZE_MAP[settings.dayNumberSize]}
+                                            ${settings.secondaryDayNumberStyle === 'serif' ? 'font-serif' : 'font-sans'}
+                                            scale-[0.66] ${direction === 'rtl' ? 'origin-top-left' : 'origin-top-right'}
+                                        `}>
+                                            {item.secondaryLabel}
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Additional Calendars - Only if not redundant */}
                                 {calendarData.map((cal) => (
                                     <span key={cal.type} className={`absolute ${cal.corner} ${cal.style} ${cal.type === 'muslim' && activeCals.includes('jewish') ? 'mt-6' : ''}`}>
                                         {cal.dayStr}
                                     </span>
                                 ))}
 
-                                {/* Holidays & Times (Bottom Center) - Relative to root sizing */}
+                                {/* Holidays & Times (Bottom Center) */}
                                 <div className="absolute bottom-1.5 left-0 right-0 flex flex-col items-center justify-end pointer-events-none gap-0.5 px-0.5">
                                     {allHolidays.slice(0, 2).map((h, i) => (
                                         <div key={i} className="text-[0.6rem] font-semibold text-center text-sky-400 leading-tight w-full truncate px-0.5">

@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useAppStore } from '../../store/AppContext';
 import { format } from 'date-fns';
-import { getLocale } from '../../utils/dateLocales';
+import { CalendarStrategyFactory } from '../../services/calendar/CalendarStrategyFactory';
 
 export const ClockWidget: React.FC = () => {
     const [time, setTime] = useState(new Date());
     const { settings } = useAppStore();
-    const currentLocale = getLocale(settings.language);
 
     useEffect(() => {
         const timer = setInterval(() => setTime(new Date()), 1000);
@@ -15,8 +14,10 @@ export const ClockWidget: React.FC = () => {
 
     const timeFormatString = settings.timeFormat === '12' ? 'hh:mm:ss a' : 'HH:mm:ss';
 
-    // Format: "Monday, 12" (Weekday, Day) - Localized
-    const dateString = format(time, 'EEEE, d', { locale: currentLocale });
+    const strategy = CalendarStrategyFactory.getStrategy(settings.calendarSystem);
+
+    // Format: Handled by Strategy
+    const dateString = strategy.formatDate(time, settings.language);
 
     return (
         <div className="flex flex-col items-start select-none">

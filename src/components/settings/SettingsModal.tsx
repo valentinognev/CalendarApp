@@ -253,6 +253,31 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
                                         </div>
                                     </div>
 
+                                    <div className="space-y-3 pt-4 border-t border-slate-700/50">
+                                        <label className="text-slate-300 text-sm font-medium">Primary Calendar System</label>
+                                        <div className="grid grid-cols-2 gap-3">
+                                            <button
+                                                onClick={() => updateSettings({ calendarSystem: 'gregorian' })}
+                                                className={`flex items-center justify-center gap-2 group p-4 border rounded-xl text-left transition-all relative overflow-hidden ${settings.calendarSystem === 'gregorian' ? 'bg-sky-500/10 border-sky-500' : 'bg-slate-800 border-slate-700 hover:bg-slate-700'}`}
+                                            >
+                                                <div className="relative z-10 w-full">
+                                                    <span className={`block text-sm font-semibold mb-1 ${settings.calendarSystem === 'gregorian' ? 'text-sky-400' : 'text-slate-200'}`}>Gregorian</span>
+                                                    <span className="text-xs text-slate-500 block">Standard (Jan-Dec)</span>
+                                                </div>
+                                            </button>
+
+                                            <button
+                                                onClick={() => updateSettings({ calendarSystem: 'jewish' })}
+                                                className={`flex items-center justify-center gap-2 group p-4 border rounded-xl text-left transition-all relative overflow-hidden ${settings.calendarSystem === 'jewish' ? 'bg-sky-500/10 border-sky-500' : 'bg-slate-800 border-slate-700 hover:bg-slate-700'}`}
+                                            >
+                                                <div className="relative z-10 w-full">
+                                                    <span className={`block text-sm font-semibold mb-1 ${settings.calendarSystem === 'jewish' ? 'text-sky-400' : 'text-slate-200'}`}>Jewish</span>
+                                                    <span className="text-xs text-slate-500 block">Hebrew (Tishrei-Elul)</span>
+                                                </div>
+                                            </button>
+                                        </div>
+                                    </div>
+
                                     <div className="space-y-3">
                                         <label className="text-slate-300 text-sm font-medium">{t.highlightWeekends}</label>
                                         <div className="grid grid-cols-3 gap-3">
@@ -577,6 +602,30 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
                                                 ))}
                                             </div>
                                         </div>
+                                        <div className="space-y-3">
+                                            <label className="text-slate-300 text-sm font-medium">Primary Font Style</label>
+                                            <div className="flex gap-2">
+                                                {(['sans', 'serif'] as const).map(style => (
+                                                    <button key={style} onClick={() => updateSettings({ primaryDayNumberStyle: style })}
+                                                        className={`flex-1 py-2 border rounded-lg uppercase text-xs font-bold ${settings.primaryDayNumberStyle === style ? 'bg-sky-900 border-sky-500 text-sky-400' : 'border-slate-700 text-slate-500'}`}>
+                                                        {style}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </div>
+
+                                        <div className="space-y-3">
+                                            <label className="text-slate-300 text-sm font-medium">Secondary Font Style</label>
+                                            <div className="flex gap-2">
+                                                {(['sans', 'serif'] as const).map(style => (
+                                                    <button key={style} onClick={() => updateSettings({ secondaryDayNumberStyle: style })}
+                                                        className={`flex-1 py-2 border rounded-lg uppercase text-xs font-bold ${settings.secondaryDayNumberStyle === style ? 'bg-sky-900 border-sky-500 text-sky-400' : 'border-slate-700 text-slate-500'}`}>
+                                                        {style}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </div>
+
                                         <div className="space-y-3">
                                             <label className="text-slate-300 text-sm font-medium">{t.dayNumAlign}</label>
                                             <div className="flex gap-2">
