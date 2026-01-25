@@ -11,13 +11,13 @@ import { fetchSunsetTimes, getSunsetTime } from '../../services/SunsetService';
 
 const SIZE_MAP: Record<string, string> = {
     sm: 'text-sm',
-    md: 'text-xl',
+    md: 'text-lg',
     lg: 'text-2xl',
     xl: 'text-4xl'
 };
 
 const NAME_SIZE_MAP: Record<string, string> = {
-    sm: 'text-xs',
+    sm: 'text-[0.7rem]',
     md: 'text-sm',
     lg: 'text-base',
     xl: 'text-lg'
@@ -103,7 +103,7 @@ export const CalendarWidget: React.FC = () => {
         return (
             <div className="flex flex-col h-full animate-in fade-in duration-500 border-t border-border pt-4">
                 {/* Header Row */}
-                <div className="grid grid-cols-7 mb-4 pb-2">
+                <div className="grid grid-cols-7 mb-2 pb-1">
                     {weekDays.map(day => (
                         <div
                             key={day.toString()}
@@ -119,7 +119,7 @@ export const CalendarWidget: React.FC = () => {
                 </div>
 
                 {/* Grid */}
-                <div className={`grid grid-cols-7 gap-4 flex-grow ${viewMode === 'week' ? 'grid-rows-1' : `grid-rows-${calendarDays.length / 7}`}`}>
+                <div className={`grid grid-cols-7 gap-2 flex-grow ${viewMode === 'week' ? 'grid-rows-1' : `grid-rows-${calendarDays.length / 7}`}`}>
                     {calendarDays.map((day) => {
                         const isCurrentMonth = viewMode === 'week' ? true : isSameMonth(day, monthStart);
                         const isDayToday = isToday(day);
@@ -317,7 +317,7 @@ export const CalendarWidget: React.FC = () => {
                                 key={day.toString()}
                                 onClick={() => setSelectedDate(day)}
                                 className={`
-                                  p-4 rounded-2xl relative flex flex-col transition-all hover:-translate-y-1 hover:bg-surface-hover cursor-pointer group
+                                  p-2.5 rounded-2xl relative flex flex-col transition-all hover:-translate-y-1 hover:bg-surface-hover cursor-pointer group min-h-0
                                   ${ALIGN_MAP[settings.dayNumberAlign]}
                                   ${isDayToday
                                         ? 'bg-gradient-to-br from-surface to-primary/20 border border-primary shadow-[0_0_15px_var(--color-primary-glow)]'
@@ -339,24 +339,24 @@ export const CalendarWidget: React.FC = () => {
                                     </span>
                                 ))}
 
-                                {/* Holidays & Times (Bottom Center) */}
-                                <div className="absolute bottom-1 left-0 right-0 flex flex-col items-center justify-end pointer-events-none gap-0.5">
+                                {/* Holidays & Times (Bottom Center) - Relative to root sizing */}
+                                <div className="absolute bottom-1.5 left-0 right-0 flex flex-col items-center justify-end pointer-events-none gap-0.5 px-0.5">
                                     {allHolidays.slice(0, 2).map((h, i) => (
-                                        <div key={i} className="text-[10px] font-semibold text-center text-sky-400 leading-tight w-full truncate px-1">
+                                        <div key={i} className="text-[0.6rem] font-semibold text-center text-sky-400 leading-tight w-full truncate px-0.5">
                                             {h}
                                         </div>
                                     ))}
                                     {shabbatTime && (
-                                        <div className="text-[10px] font-mono font-medium text-text-muted bg-surface/80 px-1 rounded-sm shadow-sm">
+                                        <div className="text-[0.65rem] font-mono font-medium text-text-muted bg-surface/90 px-1 rounded-sm shadow-sm backdrop-blur-sm">
                                             {shabbatTime}
                                         </div>
                                     )}
                                 </div>
 
                                 {/* Events List */}
-                                <div className={`w-full mt-1 flex flex-col gap-1 ${settings.dayNumberAlign === 'center' ? 'items-center' : settings.dayNumberAlign === 'right' ? 'items-end' : 'items-start'} ${(allHolidays.length > 0 || shabbatTime) ? 'mb-6' : ''}`}>
+                                <div className={`w-full mt-1 flex flex-col gap-0.5 ${settings.dayNumberAlign === 'center' ? 'items-center' : settings.dayNumberAlign === 'right' ? 'items-end' : 'items-start'} ${(allHolidays.length > 0 || shabbatTime) ? 'mb-5' : ''}`}>
                                     {dayEvents.slice(0, 3).map(e => (
-                                        <div key={e.id} className="text-[10px] bg-sky-500/10 text-sky-400 px-1.5 py-0.5 rounded-md truncate max-w-full border border-sky-500/20">
+                                        <div key={e.id} className="text-[9px] bg-sky-500/10 text-sky-400 px-1 py-0.5 rounded-md truncate max-w-full border border-sky-500/20 leading-none">
                                             {e.title}
                                         </div>
                                     ))}

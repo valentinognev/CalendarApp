@@ -3,11 +3,11 @@
 ## 📜 Version History (Recent Highlights)
 
 ### January 2026
-- **Sunset/Shabbat Integration**: Implemented `SunsetService` to calculate Shabbat entry/exit times based on location (latitude) using a lookup table (`SunsetTimes.csv`) instead of complex runtime astronomy libraries.
-- **Jewish Holidays Overhaul**: Migrated holiday data to `JewishSpecialDays.csv` to serve as a rigid "Source of Truth" for names and dates, solving localization consistency issues across EN/RU/HE.
-- **Localization**: Completed full UI translation logic, including dynamic RTL switching for Hebrew and language-specific holiday names.
-- **Event System**: Added persistent custom events (recurrence support) stored in `localStorage`.
-- **UI Polish**: Added "Premium Wall" aesthetic, image categories for background, and smooth animations.
+- **Sunset/Shabbat Integration**: Implemented `SunsetService` to calculate Shabbat entry/exit times based on location (latitude) using a lookup table (`SunsetTimes.csv`).
+- **Jewish Holidays Overhaul**: Migrated holiday data to `JewishSpecialDays.csv` and fixed language duplication/mix issues. Implemented a **Canonical Mapping Deduplication** logic to handle synonyms.
+- **Responsive Fluid UI**: Implemented **Global Dynamic Scaling** via responsive root font-size (`clamp`) and fluid grid headers. The calendar now dynamically calculates week counts (4-6 weeks) to fill the height perfectly without clipping.
+- **Location Self-Sufficiency**: Added **Automatic Geocoding Search** (via Nominatim) and Timezone-based coordinate fallback, making the Shabbat times work out-of-the-box worldwide.
+- **Portability**: Converted all data fetching to relative paths and added a modern `install.sh` for easy deployment.
 
 ## 🏗 Architectural Evolution
 
@@ -40,5 +40,6 @@
 | `public/UtilityFiles/NationalHolidays/` | Folder containing per-country national holiday CSVs. |
 
 ## 🔮 Future Considerations
-- **Timezones**: Currently assumes local device time. Future updates might need explicit timezone handling if accurate "remote" times are needed.
-- **Geo-Location**: Currently relies on browser API. If blocked, fallback logic for default location (e.g., Jerusalem or user-selected) needs to be strengthened.
+- **Timezones**: Currently assumes local device time. Added timezone-to-coordinate mapping for better "Zero Configuration."
+- **Geo-Location**: Strengthened with a hybrid approach: Browser API -> Timezone Mapping -> Manual Search (Nominatim) -> Manual Coordinates.
+- **Responsive Layout**: Shifted to a fully dynamic grid with 4/5/6 week heights and `rem`-based scaling relative to window size.

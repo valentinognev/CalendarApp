@@ -152,11 +152,11 @@ const DashboardContent: React.FC = () => {
               onClick={jumpToToday}
               title="Jump to Today"
             >
-              <h2 className="text-7xl font-bold text-text-main capitalize tracking-tighter min-w-[300px] leading-none drop-shadow-2xl">
+              <h2 className="text-[clamp(2rem,6vw,4.5rem)] font-bold text-text-main capitalize tracking-tighter min-w-[max-content] leading-none drop-shadow-2xl">
                 {headerTitle}
               </h2>
               {activeSubtitles.length > 0 && (
-                <span className="text-2xl font-light text-primary mt-2 opacity-80 flex gap-3 tracking-wide">
+                <span className="text-[clamp(1rem,2vw,1.5rem)] font-light text-primary mt-2 opacity-80 flex gap-3 tracking-wide whitespace-nowrap">
                   {activeSubtitles.map((sub, i) => (
                     <React.Fragment key={i}>
                       <span>{sub}</span>

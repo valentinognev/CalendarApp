@@ -124,7 +124,7 @@ for (const h of HOLIDAYS) {
 
     // Determine base name for lookup (e.g., "Passover 1" -> "Passover")
     // Very simple loose matching
-    let baseKey = null;
+    let baseKey = h.name;
     if (h.name.includes('Passover')) baseKey = 'Passover';
     else if (h.name.includes('Rosh Hashanah')) baseKey = 'Rosh Hashanah';
     else if (h.name.includes('Yom Kippur')) baseKey = 'Yom Kippur';
@@ -136,18 +136,12 @@ for (const h of HOLIDAYS) {
 
     for (const lang of LANGUAGES) {
         let name = h.name; // Default to English name in struct
-        if (baseKey && TRANSLATIONS[baseKey] && TRANSLATIONS[baseKey][lang]) {
-            // If we have a translation for the base name, use it.
-            // If the original name had a suffix (e.g. " 1"), append it/keep it? 
-            // For now, just use the specific translation if exact, or append number?
-            // "Passover 1" -> "Pesach 1"?
+        if (TRANSLATIONS[baseKey] && TRANSLATIONS[baseKey][lang]) {
             const trans = TRANSLATIONS[baseKey][lang];
             const suffix = h.name.replace(baseKey, '').trim();
             name = suffix ? `${trans} ${suffix}` : trans;
         } else if (lang === 'he' && TRANSLATIONS[baseKey] && TRANSLATIONS[baseKey].he) {
-            // Fallback for hebrew specifically if not handled above
-            const trans = TRANSLATIONS[baseKey].he;
-            name = trans; // Simplification
+            name = TRANSLATIONS[baseKey].he;
         }
 
         // Escape commas

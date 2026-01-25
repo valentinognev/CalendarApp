@@ -28,6 +28,9 @@
   line-height: 1.5;
   font-weight: 400;
 
+  /* Global Scaling: Adjusts base REM unit based on viewport size */
+  font-size: clamp(12px, 0.9vw + 0.9vh, 18px);
+
   overflow: hidden;
 }
 
