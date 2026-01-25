@@ -7,7 +7,15 @@
 - **Jewish Holidays Overhaul**: Migrated holiday data to `JewishSpecialDays.csv`. Completed a **Full Hebrew Audit**, ensuring 100% Hebrew coverage for all holidays and fast days. Refined deduplication logic to handle multi-language overlaps seamlessly.
 - **Dynamic Holiday Timings**: Extended the Shabbat timing engine to all official holidays. The app now displays **Candle Lighting (🕯️)** on the eve of any official holiday and **Star Appearance (✨)** at its conclusion, using location-aware lookahead logic.
 - **Automatic Theme Switching**: Implemented a location-aware theme engine. Toggles to **Light mode at 07:00** and to **Dark mode exactly at Sunset**, ensuring the app matches the natural rhythm of the user's environment.
-- **Responsive Fluid UI**: Implemented **Global Dynamic Scaling** via responsive root font-size (`clamp`). Refined this to be **Settings-Relative**, allowing the UI to respect manual "Small/Medium/Large" user preferences while staying perfectly responsive.
+- **Visual Polish & RTL Mirroring**: 
+  - Implemented a fully mirrored layout for RTL languages (Hebrew/Arabic), ensuring date numbers and secondary labels swap positions logically.
+  - Refactored cell headers to use **Flexbox alignment**, physically preventing label overlap even at maximum font sizes.
+- **Advanced Grid Distribution**: Optimized vertical scaling for the calendar grid. Switched to dynamic inline `gridTemplateRows` to ensure 4, 5, and 6-row months always distribute vertical space exactly equally without bottom-row squashing.
+- **Typography Refinement**: 
+  - **Proportional Scaling**: Enforced a strict 2/3 font size ratio for secondary dates relative to primary numbers.
+  - **Compact Settings**: Redesigned the Settings Modal with a high-density, compact layout (reduced font sizes and padding) for better information density.
+  - **Header Balance**: Scaled down the primary month title to achieve a more harmonious and modern header aesthetic.
+- **Subtitle Logic Consolidation**: Unified all header subtitle generation in `App.tsx`. Added smart logic to show the Gregorian month range when viewing alternative calendar systems, while preventing redundant labels.
 - **Location Self-Sufficiency**: Added **Automatic Geocoding Search** (via Nominatim) and Timezone-based coordinate fallback, making the Shabbat times work out-of-the-box worldwide.
 - **Portability**: Converted all data fetching to relative paths and added a modern `install.sh` for easy deployment.
 
